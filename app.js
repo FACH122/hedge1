@@ -397,7 +397,7 @@
     function onBoxClick(i) {
         const p = puzzles[i];
         const st = boxState(p);
-        if (st === 'solved') { showToast('✔ حُلّت من قبل — انتظري الصندوق القادم'); return; }
+        if (st === 'solved') { showReward(p); return; }
         if (st === 'locked') { showToast('🔒 تُفتح في ' + p.unlock); return; }
         openDetail(p, i);
     }
@@ -407,6 +407,8 @@
         $id('boxes-grid').querySelectorAll('.box').forEach((b, j) =>
             b.classList.toggle('selected', j === i));
         showOnly('box-detail');
+        $id('reward-view').style.display = 'none';
+        document.querySelector('#box-detail .answer-row').style.display = '';
         document.getElementById('box-progress').textContent =
             `الصندوق ${i + 1} من ${puzzles.length}`;
         document.getElementById('box-question').textContent = p.q;
@@ -446,34 +448,42 @@
         if (e.key === 'Enter') $id('box-submit').click();
     });
 
+    function showReward(p) {
+        activeBox = null;
+        $id('box-detail').style.display = '';
+        document.querySelector('#box-detail .answer-row').style.display = 'none';
+        $id('box-wrong').style.display = 'none';
+        $id('rec-zone').style.display = 'none';
+        $id('reward-view').style.display = 'block';
+        document.getElementById('reward-text').innerText = p.reward || '';
+        const img = document.getElementById('reward-image');
+        if (img._t) clearTimeout(img._t);
+        img.style.transition = '';
+        img.style.opacity = '1';
+        if (p.reward_image) {
+            img.src = p.reward_image;
+            img.style.display = 'block';
+            img._t = setTimeout(() => {
+                img.style.transition = 'opacity 1s ease'; img.style.opacity = '0';
+                setTimeout(() => { img.style.display = 'none'; }, 1000);
+            }, 5000);
+        } else img.style.display = 'none';
+        const next = puzzles.find(x => !solvedIds.includes(x.qid));
+        document.getElementById('next-hint').innerText = next
+            ? 'الصندوق التالي ينتظركِ ✦'
+            : 'أنهيتِ كلَّ الصناديق... أحبكِ يا ' + getHerName() + ' ✦';
+        $id('box-detail').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
     function solveBox(p) {
         solvedIds.push(p.qid);
         localStorage.setItem('solvedIds', JSON.stringify(solvedIds));
         playChime();
         burst(innerWidth / 2, innerHeight / 2, 120);
         if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
-
-        $id('rec-zone').style.display = 'none';
-        showOnly('reward-view');
-        document.getElementById('reward-text').innerText = p.reward || '';
-        const img = document.getElementById('reward-image');
-        if (img._t) clearTimeout(img._t);
-        if (p.reward_image) {
-            img.src = p.reward_image;
-            img.style.display = 'block';
-            img.style.opacity = '1';
-            img._t = setTimeout(() => {
-                img.style.transition = 'opacity 1s ease'; img.style.opacity = '0';
-                setTimeout(() => { img.style.display = 'none'; }, 1000);
-            }, 5000);
-        } else img.style.display = 'none';
-
-        const next = puzzles.find(x => !solvedIds.includes(x.qid));
-        document.getElementById('next-hint').innerText = next
-            ? 'الصندوق التالي ينتظركِ ✦'
-            : 'أنهيتِ كلَّ الصناديق... أحبكِ يا ' + getHerName() + ' ✦';
         renderBoxes();
         pushProgress();
+        showReward(p);
     }
     renderBoxes();
 
