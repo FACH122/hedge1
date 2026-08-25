@@ -62,6 +62,7 @@
     </style>
 </head>
 <body>
+    <div id="err-banner" style="display:none;position:fixed;top:0;left:0;right:0;background:#e03131;color:#fff;padding:8px 14px;font-size:13px;z-index:9999;text-align:center"></div>
     <div class="gate" id="gate">
         <h1>✦ لوحة التحكم</h1>
         <input type="email" id="email" placeholder="البريد الإلكتروني" autocomplete="username">
@@ -137,6 +138,15 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+function showErr(m) {
+    const b = document.getElementById('err-banner');
+    b.style.display = 'block';
+    b.textContent = '⚠️ ' + m;
+    setTimeout(() => { b.style.display = 'none'; }, 10000);
+}
+window.addEventListener('error', e => showErr(e.message || 'خطأ غير متوقع'));
+window.addEventListener('unhandledrejection', e => showErr((e.reason && e.reason.message) || String(e.reason)));
+
 const SB_URL = 'https://cahufgydkmeqjxgamnxy.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhaHVmZ3lka21lcWp4Z2Ftbnh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2ODkzNTIsImV4cCI6MjEwMzI2NTM1Mn0.3ZqR71brJbGLjrYqCR1ZNQ-zutOaLSa6hSb8oTN7os4';
 const sb = supabase.createClient(SB_URL, SB_KEY);
@@ -281,19 +291,22 @@ function cardData(card) {
 
 async function savePuzzle(btn) {
     const card = btn.closest('.card');
-    const i = +card.dataset.i;
-    P[i] = cardData(card);
-    if (!P[i].q) return setStatus(card, 'اكتب السؤال أولاً', false);
-    btn.disabled = true;
-    setStatus(card, '...جاري الحفظ', true);
     try {
+        const i = +card.dataset.i;
+        if (!P[i]) throw new Error('اللغز غير موجود في القائمة — حدّثي الصفحة');
+        P[i] = cardData(card);
+        if (!P[i].q) { setStatus(card, 'اكتب السؤال أولاً', false); return; }
+        btn.disabled = true;
+        setStatus(card, '...جاري الحفظ', true);
         P = P.filter(p => p.q && p.q.trim());
         await saveKey('puzzles', P);
         setStatus(card, '✔ حُفظ — ظهرت في الموقع!', true);
         setTimeout(renderPuzzleList, 300);
     } catch (e) {
-        setStatus(card, '✕ فشل: ' + e.message, false);
-    } finally { btn.disabled = false; }
+        setStatus(card, '✕ فشل الحفظ: ' + e.message, false);
+    } finally {
+        btn.disabled = false;
+    }
 }
 function loadPuzzlesQuiet(){ loadAll().then(renderPuzzleList); }
 
@@ -373,7 +386,7 @@ function pickImage(btn) {
     inp.click();
 }
 
-function uploadImg(file, btn) {
+async function uploadImg(file, btn) {
     const card = btn.closest('.card');
     const st = card.querySelector('.status');
 
@@ -385,56 +398,63 @@ function uploadImg(file, btn) {
     const url = `${SB_URL}/storage/v1/object/rewards/${fname}`;
 
     btn.disabled = true;
-    st.textContent = '...جاري الرفع 0%'; st.className = 'status ok';
+    st.textContent = '...جاري الرفع 0%';
+    st.className = 'status ok';
 
     let done = false;
+    const finish = () => { if (!done) { done = true; clearTimeout(failTimer); btn.disabled = false; } };
     const failTimer = setTimeout(() => {
         if (done) return;
-        done = true;
-        xhr.abort();
-        btn.disabled = false;
-        setStatus(card, '✕ توقف الرفع — جرّبي صورة أصغر أو شبكة أخرى', false);
-    }, 40000);
+        try { xhr.abort(); } catch (_) {}
+        finish();
+        st.className = 'status err';
+        setStatus(card, '✕ انتهت مهلة الرفع — تحققي من الاتصال وحاولي مجدداً', false);
+    }, 60000);
 
     const xhr = new XMLHttpRequest();
 
-    authHeaders(false).then(h => {
+    try {
+        const h = await authHeaders(false);
         xhr.open('POST', url, true);
         xhr.setRequestHeader('Authorization', h.Authorization);
         xhr.setRequestHeader('apikey', h.apikey);
         xhr.setRequestHeader('Content-Type', file.type);
-    xhr.upload.onprogress = e => {
-        if (e.lengthComputable) {
-            const pct = Math.round(e.loaded / e.total * 100);
-            st.textContent = `...جاري الرفع ${pct}%`;
-        }
-    };
-    xhr.onload = () => {
-        if (done) return;
-        done = true;
-        clearTimeout(failTimer);
-        btn.disabled = false;
-        if (xhr.status >= 200 && xhr.status < 300) {
-            const publicUrl = `${SB_URL}/storage/v1/object/public/rewards/${fname}`;
-            card.querySelector('.f-img').value = publicUrl;
-            const img = card.querySelector('.rimg');
-            img.src = publicUrl; img.style.display = 'block';
-            setStatus(card, '✔ رُفعت بنجاح — اضغط 💾 حفظ لتثبيتها', true);
-        } else {
-            let msg = 'HTTP ' + xhr.status;
-            try { msg = JSON.parse(xhr.responseText).message || msg; } catch (_) {}
-            setStatus(card, '✕ فشل الرفع: ' + msg, false);
-        }
-    };
-    xhr.onerror = () => {
-        if (done) return;
-        done = true;
-        clearTimeout(failTimer);
-        btn.disabled = false;
-        setStatus(card, '✕ خطأ شبكة — تعطّل الإرسال', false);
-    };
-    xhr.send(file);
-    });
+        xhr.upload.onprogress = e => {
+            if (e.lengthComputable) {
+                const pct = Math.round(e.loaded / e.total * 100);
+                st.textContent = `...جاري الرفع ${pct}%`;
+            }
+        };
+        xhr.onload = () => {
+            finish();
+            if (xhr.status >= 200 && xhr.status < 300) {
+                const publicUrl = `${SB_URL}/storage/v1/object/public/rewards/${fname}`;
+                card.querySelector('.f-img').value = publicUrl;
+                const img = card.querySelector('.rimg');
+                img.src = publicUrl; img.style.display = 'block';
+                setStatus(card, '✔ رُفعت بنجاح — اضغط 💾 حفظ لتثبيتها', true);
+            } else {
+                let msg = 'HTTP ' + xhr.status;
+                try { msg = JSON.parse(xhr.responseText).message || msg; } catch (_) {}
+                st.className = 'status err';
+                setStatus(card, '✕ فشل الرفع: ' + msg, false);
+            }
+        };
+        xhr.onerror = () => {
+            finish();
+            st.className = 'status err';
+            setStatus(card, '✕ خطأ شبكة — تعطّل الإرسال', false);
+        };
+        xhr.onabort = () => {
+            finish();
+            st.className = 'status err';
+        };
+        xhr.send(file);
+    } catch (e) {
+        finish();
+        st.className = 'status err';
+        setStatus(card, '✕ فشل بدء الرفع: ' + e.message, false);
+    }
 }
 
 function clearImage(btn) {
