@@ -82,7 +82,7 @@
         <div id="tab-puzzles">
             <div class="toolbar">
                 <button class="tbtn" onclick="newPuzzle()">➕ لغز جديد</button>
-                <button class="tbtn" onclick="loadPuzzles()">↺ تحديث</button>
+                <button class="tbtn" onclick="loadAll().then(renderPuzzleList)">↺ تحديث</button>
                 <span style="color:#7d5468;font-size:0.82rem">📅 حدّدي يوم فتح كل صندوق — يُفتح تلقائياً في يومه</span>
             </div>
             <div id="plist"><div class="loading">...جاري التحميل</div></div>
