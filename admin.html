@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✦ لوحة التحكم</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background: #fdf2f7; color: #44263b; min-height: 100vh; padding: 24px 14px 60px; }
+        h1 { text-align: center; font-size: 1.25rem; margin-bottom: 20px; color: #c2255c; }
+        .gate { max-width: 340px; margin: 14vh auto 0; background: #fff; border: 1px solid #f3d3e1;
+            border-radius: 16px; padding: 36px 26px; text-align: center; box-shadow: 0 10px 30px rgba(214,51,108,.08); }
+        .gate input { width: 100%; padding: 13px; border-radius: 10px; margin-bottom: 12px;
+            border: 1px solid #f3d3e1; font-size: 1rem; outline: none; text-align: center; }
+        .gate input:focus { border-color: #e64980; }
+        .btn-main { width: 100%; padding: 13px; border: none; border-radius: 10px; cursor: pointer;
+            background: linear-gradient(135deg,#f783ac,#c2255c); color: #fff; font-weight: 700; font-size: 1rem; }
+        .wrap { max-width: 780px; margin: 0 auto; }
+        .tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 22px; flex-wrap: wrap; }
+        .tab-btn { padding: 10px 20px; border-radius: 24px; cursor: pointer; font-size: 0.9rem;
+            background: #fff; border: 1px solid #f3d3e1; color: #7d5468; }
+        .tab-btn.active { background: linear-gradient(135deg,#f783ac,#c2255c); color: #fff; border-color: transparent; font-weight: 700; }
+        .toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; justify-content: center; align-items: center; }
+        .tbtn { background: #fff; border: 1px solid #f3d3e1; color: #c2255c;
+            padding: 9px 18px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; }
+        .tbtn:hover { background: #fff0f6; }
+        .card { background: #fff; border: 1px solid #f3d3e1; border-radius: 14px;
+            padding: 18px; margin-bottom: 14px; direction: rtl; }
+        .card label { display: block; font-size: 0.78rem; font-weight: 700; color: #c2255c; margin: 12px 0 5px; }
+        .card textarea, .card input[type=text], .card input[type=number] {
+            width: 100%; border: 1px solid #f3d3e1; border-radius: 9px;
+            padding: 10px; font-family: inherit; font-size: 0.95rem; outline: none; color: #44263b; background: #fffbfd;
+        }
+        .card textarea:focus, .card input:focus { border-color: #e64980; }
+        .card textarea { resize: vertical; min-height: 50px; }
+        .num-row { display: flex; gap: 12px; align-items: center; margin-bottom: 4px; }
+        .num-badge { background: #ffe9f3; color: #c2255c; font-weight: 700; border-radius: 50%;
+            width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; align-items: center; }
+        .save { background: linear-gradient(135deg,#f783ac,#c2255c); color: #fff; border: none;
+            padding: 10px 24px; border-radius: 20px; cursor: pointer; font-weight: 700; font-size: 0.85rem; }
+        .del { background: #fff; border: 1px solid #ffc9c9; color: #e03131;
+            padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; }
+        .status { font-size: 0.82rem; min-height: 1.2em; margin-top: 8px; }
+        .status.ok { color: #2b8a3e; } .status.err { color: #e03131; }
+        .rimg { max-width: 170px; max-height: 120px; border-radius: 10px; margin-top: 8px;
+            border: 1px solid #f3d3e1; display: block; }
+        .big-ta { width: 100%; min-height: 170px; border: 1px solid #f3d3e1; border-radius: 12px;
+            padding: 14px; font-family: inherit; font-size: 1rem; line-height: 2; resize: vertical;
+            outline: none; direction: rtl; color: #44263b; background: #fffbfd; }
+        .hint { color: #7d5468; font-size: 0.8rem; margin: 6px 0 18px; line-height: 1.9; }
+        .lbl { font-size: 0.88rem; font-weight: 700; color: #c2255c; display: block; margin: 18px 0 6px; }
+        .voice-item { background: #fff; border: 1px solid #f3d3e1; border-radius: 12px;
+            padding: 14px; margin-bottom: 10px; direction: rtl; }
+        .voice-meta { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;
+            font-size: 0.85rem; margin-bottom: 8px; }
+        .voice-meta b { color: #c2255c; }
+        audio { width: 100%; height: 38px; }
+        .empty { text-align: center; color: #7d5468; padding: 40px 0; line-height: 2; }
+        .loading { text-align: center; color: #c2255c; padding: 30px; font-weight: 700; }
+        #img-grid img { width: 110px; height: 110px; object-fit: cover; border-radius: 10px; border: 1px solid #f3d3e1; }
+    </style>
+</head>
+<body>
+    <div class="gate" id="gate">
+        <h1>✦ لوحة التحكم</h1>
+        <input type="email" id="email" placeholder="البريد الإلكتروني" autocomplete="username">
+        <input type="password" id="pass" placeholder="كلمة المرور" autocomplete="current-password">
+        <button class="btn-main" onclick="tryEnter()">دخول</button>
+    </div>
+
+    <div class="wrap" id="app" style="display:none">
+        <h1>✦ إدارة الحديقة ✦ <small style="color:#c2255c;font-size:0.7rem">v3.2</small></h1>
+        <div class="tabs">
+            <button class="tab-btn active" data-t="puzzles" onclick="showTab('puzzles')">🧩 الألغاز</button>
+            <button class="tab-btn" data-t="texts" onclick="showTab('texts')">💬 النصوص</button>
+            <button class="tab-btn" data-t="poem" onclick="showTab('poem')">📜 القصيدة</button>
+            <button class="tab-btn" data-t="voices" onclick="showTab('voices')">🎙️ رسائلها</button>
+        </div>
+
+        <div id="tab-puzzles">
+            <div class="toolbar">
+                <button class="tbtn" onclick="newPuzzle()">➕ لغز جديد</button>
+                <button class="tbtn" onclick="loadPuzzles()">↺ تحديث</button>
+                <span style="color:#7d5468;font-size:0.82rem">📅 حدّدي يوم فتح كل صندوق — يُفتح تلقائياً في يومه</span>
+            </div>
+            <div id="plist"><div class="loading">...جاري التحميل</div></div>
+        </div>
+
+        <div id="tab-texts" style="display:none">
+            <label class="lbl">💬 رسالة اليوم (سطر لكل يوم)</label>
+            <textarea class="big-ta" id="ta-daily"></textarea>
+
+            <label class="lbl">🌸 ذكرى اليوم (سطر لكل ذكرى)</label>
+            <textarea class="big-ta" id="ta-memory"></textarea>
+
+            <label class="lbl">💗 أسباب الحب (سبب في كل سطر)</label>
+            <textarea class="big-ta" id="ta-reasons"></textarea>
+
+            <label class="lbl">🔒 الرسالة السرّية (٥ ضغطات على الشعار) — استخدمي {name} لاسمها</label>
+            <textarea class="big-ta" id="ta-letter"></textarea>
+
+            <label class="lbl">✍️ رسالة الآلة الكاتبة (تظهر قبل القصيدة) — استخدمي {name}</label>
+            <textarea class="big-ta" id="ta-typed"></textarea>
+
+            <div class="toolbar" style="margin-top:16px">
+                <button class="save" onclick="saveTexts()">💾 حفظ النصوص</button>
+                <button class="tbtn" onclick="loadAll()">↺ استعادة المحفوظ</button>
+            </div>
+            <p class="status" id="text-status" style="text-align:center"></p>
+        </div>
+
+        <div id="tab-poem" style="display:none">
+            <p class="hint" style="text-align:right">
+                • سطر فارغ = بين كل مقطع والآخر<br>
+                • اكتبي **قبل أي كلمة ليجعلها ذهبية مثل: **كلمة مميزة
+            </p>
+            <textarea class="big-ta" id="ta-poem" style="min-height:320px"></textarea>
+            <div class="toolbar" style="margin-top:16px">
+                <button class="save" onclick="savePoem()">💾 حفظ القصيدة</button>
+                <button class="tbtn" onclick="loadAll()">↺ استعادة المحفوظ</button>
+            </div>
+            <p class="status" id="poem-status" style="text-align:center"></p>
+        </div>
+
+        <div id="tab-voices" style="display:none">
+            <div class="toolbar">
+                <span class="tbtn" id="vcount" style="cursor:default;border:none;background:none;color:#7d5468"></span>
+                <button class="tbtn" onclick="loadVoices()">↺ تحديث</button>
+            </div>
+            <label class="lbl">📷 صورها المرسلة</label>
+            <div id="img-grid" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px"></div>
+            <label class="lbl">🎙️ تسجيلاتها الصوتية</label>
+            <div id="vlist"><div class="loading">...جاري التحميل</div></div>
+        </div>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL = 'https://gmjvwnqjoiloolyzwwox.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtanZ3bnFqb2lsb29seXp3d294Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2Mjg5MDYsImV4cCI6MjEwMzIwNDkwNn0.lLbHjBbfVRrCM10kTWc-6Tx-ga117soIbED4qpR-s_4';
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+async function authHeaders(json = true) {
+    const { data } = await sb.auth.getSession();
+    const token = data?.session?.access_token || SB_KEY;
+    const h = { apikey: SB_KEY, Authorization: 'Bearer ' + token };
+    if (json) h['Content-Type'] = 'application/json';
+    return h;
+}
+
+async function tryEnter() {
+    const btn = document.querySelector('.btn-main');
+    btn.disabled = true; btn.textContent = '...جاري الدخول';
+    const { error } = await sb.auth.signInWithPassword({ email: email.value.trim(), password: pass.value });
+    btn.disabled = false; btn.textContent = 'دخول';
+    if (error) {
+        pass.value = '';
+        pass.placeholder = error.message === 'Invalid login credentials' ? 'بريد أو كلمة مرور خاطئة!' : error.message;
+        return;
+    }
+    sessionStorage.setItem('ok', '1');
+    enter();
+}
+document.getElementById('pass').addEventListener('keydown', e => { if (e.key==='Enter') tryEnter(); });
+document.getElementById('email').addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('pass').focus(); });
+
+async function enter() {
+    const { data } = await sb.auth.getSession();
+    if (!data?.session) { sessionStorage.removeItem('ok'); gate.style.display=''; app.style.display='none'; return; }
+    gate.style.display='none'; app.style.display='block'; loadAll(); showTab('puzzles');
+}
+if (sessionStorage.getItem('ok')==='1') enter();
+
+function showTab(t) {
+    ['puzzles','texts','poem','voices'].forEach(x =>
+        document.getElementById('tab-'+x).style.display = x===t ? '' : 'none');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.t===t));
+    if (t==='voices') loadVoices();
+}
+
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+const $id = id => document.getElementById(id);
+async function saveKey(key, value) {
+    if (!DB_OK) throw new Error('جدول content غير موجود — شغّلي أمر SQL أولاً');
+    const r = await fetch(`${SB_URL}/rest/v1/content`, {
+        method: 'POST',
+        headers: { ...(await authHeaders()), Prefer: 'resolution=merge-duplicates' },
+        body: JSON.stringify({ key, value })
+    });
+    if (!r.ok) throw new Error((await r.json()).message || r.status);
+}
+
+// ================= PUZZLES =================
+let P = [];
+
+let DB_OK = true;
+
+async function loadAll() {
+    try {
+        const r = await fetch(`${SB_URL}/rest/v1/content?select=*`, { headers: await authHeaders() });
+        if (!r.ok) {
+            const err = await r.json().catch(() => ({}));
+            if (err.code === '42P01' || r.status === 404) {
+                DB_OK = false;
+                document.getElementById('plist').innerHTML =
+                    '<div class="empty" style="color:#e03131">⚠️ جدول content غير موجود!<br><br>شغّلي أمر SQL الذي أرسله لك في Supabase ثم اضغطي «↺ تحديث»</div>';
+                return;
+            }
+            throw new Error(err.message || r.status);
+        }
+        const rows = await r.json();
+        DB_OK = true;
+        const map = Object.fromEntries(rows.map(x => [x.key, x.value]));
+        P = Array.isArray(map.puzzles) ? map.puzzles : [];
+        T = map.texts || {};
+        renderPuzzleList();
+        fillTexts();
+    } catch (e) {
+        document.getElementById('plist').innerHTML =
+            `<div class="empty">⚠️ خطأ اتصال: ${esc(e.message)}</div>`;
+    }
+}
+
+document.getElementById('plist').addEventListener('input', e => {
+    const card = e.target.closest('.card');
+    if (!card || card.dataset.id === undefined) return;
+    const i = +card.dataset.i;
+    if (!P[i]) return;
+    if (e.target.classList.contains('f-q')) P[i].q = e.target.value.trim();
+    if (e.target.classList.contains('f-a')) P[i].a = e.target.value.split('|').map(s=>s.trim()).filter(Boolean);
+    if (e.target.classList.contains('f-rw')) P[i].reward = e.target.value.trim();
+    if (e.target.classList.contains('f-unlock')) P[i].unlock = e.target.value;
+});
+
+function renderPuzzleList() {
+    const el = document.getElementById('plist');
+    if (!P.length) {
+        el.innerHTML = '<div class="empty">لا ألغاز بعد — اضغط «➕ لغز جديد».<br>الموقع يعرض فقط ما تضيفينه هنا.</div>';
+        return;
+    }
+    el.innerHTML = P.map((p, i) => `
+        <div class="card" data-i="${i}">
+            <div class="num-row">
+                <div class="num-badge">${i+1}</div>
+                <label style="margin:0;flex:1;text-align:left">📅 يوم الفتح:
+                    <input type="date" class="f-unlock" value="${esc(p.unlock||'')}" style="border:1px solid #f3d3e1;border-radius:8px;padding:6px 10px;color:#44263b;margin-inline-start:6px">
+                </label>
+            </div>
+            <label>❓ السؤال</label>
+            <textarea class="f-q">${esc(p.q)}</textarea>
+            <label>✅ الجواب الصحيح (عدة جوابات؟ افصل بـ | )</label>
+            <input type="text" class="f-a" value="${esc((p.a||[]).join(' | '))}">
+            <label>🎁 المكافأة النصية (تظهر عند حلّها)</label>
+            <textarea class="f-rw">${esc(p.reward)}</textarea>
+            <label>🖼️ صورة المكافأة (تظهر ٥ ثوانٍ)</label>
+            <div class="actions" style="margin-top:4px">
+                <button class="tbtn" onclick="pickImage(this)">📁 ${p.reward_image ? 'تغيير الصورة' : 'اختيار صورة'}</button>
+                ${p.reward_image ? '<button class="tbtn" onclick="clearImage(this)">✕ بدون صورة</button>' : ''}
+            </div>
+            <img class="rimg" src="${esc(p.reward_image)}" style="display:${p.reward_image?'block':'none'}" onerror="this.style.display='none'">
+            <input type="hidden" class="f-img" value="${esc(p.reward_image)}">
+            <div class="actions">
+                <button class="save" onclick="savePuzzle(this)">💾 حفظ</button>
+                <button class="del" onclick="deletePuzzle(this)">🗑️ حذف نهائي</button>
+            </div>
+            <div class="status"></div>
+        </div>`).join('');
+}
+
+function cardData(card) {
+    return {
+        qid: P[+card.dataset.i].qid,
+        q: card.querySelector('.f-q').value.trim(),
+        a: card.querySelector('.f-a').value.split('|').map(s=>s.trim()).filter(Boolean),
+        reward: card.querySelector('.f-rw').value.trim(),
+        reward_image: card.querySelector('.f-img').value.trim(),
+        unlock: (card.querySelector('.f-unlock') || {}).value || ''
+    };
+}
+
+async function savePuzzle(btn) {
+    const card = btn.closest('.card');
+    const i = +card.dataset.i;
+    P[i] = cardData(card);
+    if (!P[i].q) return setStatus(card, 'اكتب السؤال أولاً', false);
+    btn.disabled = true;
+    setStatus(card, '...جاري الحفظ', true);
+    try {
+        P = P.filter(p => p.q && p.q.trim());
+        await saveKey('puzzles', P);
+        setStatus(card, '✔ حُفظ — ظهرت في الموقع!', true);
+        setTimeout(renderPuzzleList, 300);
+    } catch (e) {
+        setStatus(card, '✕ فشل: ' + e.message, false);
+    } finally { btn.disabled = false; }
+}
+function loadPuzzlesQuiet(){ loadAll().then(renderPuzzleList); }
+
+async function deletePuzzle(btn) {
+    const card = btn.closest('.card');
+    const i = +card.dataset.i;
+    if (!confirm(`حذف اللغز رقم ${i+1} نهائياً؟`)) return;
+    btn.disabled = true;
+    try {
+        P.splice(i, 1);
+        await saveKey('puzzles', P.filter(p => p.q && p.q.trim()));
+        setStatus(card, '✔ حُذف بنجاح', true);
+        setTimeout(loadPuzzlesQuiet, 300);
+    } catch (e) {
+        setStatus(card, '✕ فشل الحذف: ' + e.message, false);
+        btn.disabled = false;
+    }
+}
+
+function newPuzzle() {
+    const t = new Date();
+    const todayStr = t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+    P.push({ qid: crypto.randomUUID(), q:'', a:[], reward:'', reward_image:'', unlock: todayStr });
+    renderPuzzleList();
+    const first = document.getElementById('plist').querySelector('.card');
+    first.scrollIntoView({ behavior:'smooth' });
+}
+
+// ================= TEXTS =================
+let T = {};
+
+function fillTexts() {
+    $id('ta-daily').value = (T.dailyMessages||[]).join('\n');
+    $id('ta-memory').value = (T.memoriesOfDay||[]).join('\n');
+    $id('ta-reasons').value = (T.reasons||[]).join('\n');
+    $id('ta-letter').value = T.hiddenLetter || '';
+    $id('ta-typed').value = T.typedLetter || '';
+}
+
+async function saveTexts() {
+    const st = document.getElementById('text-status');
+    st.textContent = '...جاري الحفظ'; st.className = 'status ok';
+    try {
+        await saveKey('texts', {
+            dailyMessages: $id('ta-daily').value.split('\n').map(s=>s.trim()).filter(Boolean),
+            memoriesOfDay: $id('ta-memory').value.split('\n').map(s=>s.trim()).filter(Boolean),
+            reasons: $id('ta-reasons').value.split('\n').map(s=>s.trim()).filter(Boolean),
+            hiddenLetter: $id('ta-letter').value.trim(),
+            typedLetter: $id('ta-typed').value.trim()
+        });
+        st.textContent = '✔ حُفظ — الموقع تحدث تلقائياً!';
+    } catch (e) {
+        st.textContent = '✕ خطأ: ' + e.message; st.className = 'status err';
+    }
+}
+
+// ================= POEM =================
+async function savePoem() {
+    const st = document.getElementById('poem-status');
+    st.textContent = '...جاري الحفظ'; st.className = 'status ok';
+    try {
+        const stanzas = $id('ta-poem').value.split(/\n\s*\n/).map(block =>
+            block.split('\n').map(s=>s.trim()).filter(Boolean)
+        ).filter(b => b.length);
+        await saveKey('poem', stanzas);
+        st.textContent = '✔ حُفظت القصيدة!';
+    } catch (e) {
+        st.textContent = '✕ خطأ: ' + e.message; st.className = 'status err';
+    }
+}
+
+// ================= IMAGES =================
+function pickImage(btn) {
+    const inp = document.createElement('input');
+    inp.type='file'; inp.accept='image/*';
+    inp.onchange = () => inp.files[0] && uploadImg(inp.files[0], btn);
+    inp.click();
+}
+
+function uploadImg(file, btn) {
+    const card = btn.closest('.card');
+    const st = card.querySelector('.status');
+
+    if (!file.type.startsWith('image/')) return setStatus(card, '✕ اختر ملف صورة فقط', false);
+    if (file.size > 8 * 1024 * 1024) return setStatus(card, '✕ الصورة كبيرة جداً — الحد ٨ ميغا', false);
+
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const fname = `reward-${Date.now()}.${ext}`;
+    const url = `${SB_URL}/storage/v1/object/rewards/${fname}`;
+
+    btn.disabled = true;
+    st.textContent = '...جاري الرفع 0%'; st.className = 'status ok';
+
+    let done = false;
+    const failTimer = setTimeout(() => {
+        if (done) return;
+        done = true;
+        xhr.abort();
+        btn.disabled = false;
+        setStatus(card, '✕ توقف الرفع — جرّبي صورة أصغر أو شبكة أخرى', false);
+    }, 40000);
+
+    const xhr = new XMLHttpRequest();
+
+    authHeaders(false).then(h => {
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader('Authorization', h.Authorization);
+        xhr.setRequestHeader('apikey', h.apikey);
+        xhr.setRequestHeader('Content-Type', file.type);
+    xhr.upload.onprogress = e => {
+        if (e.lengthComputable) {
+            const pct = Math.round(e.loaded / e.total * 100);
+            st.textContent = `...جاري الرفع ${pct}%`;
+        }
+    };
+    xhr.onload = () => {
+        if (done) return;
+        done = true;
+        clearTimeout(failTimer);
+        btn.disabled = false;
+        if (xhr.status >= 200 && xhr.status < 300) {
+            const publicUrl = `${SB_URL}/storage/v1/object/public/rewards/${fname}`;
+            card.querySelector('.f-img').value = publicUrl;
+            const img = card.querySelector('.rimg');
+            img.src = publicUrl; img.style.display = 'block';
+            setStatus(card, '✔ رُفعت بنجاح — اضغط 💾 حفظ لتثبيتها', true);
+        } else {
+            let msg = 'HTTP ' + xhr.status;
+            try { msg = JSON.parse(xhr.responseText).message || msg; } catch (_) {}
+            setStatus(card, '✕ فشل الرفع: ' + msg, false);
+        }
+    };
+    xhr.onerror = () => {
+        if (done) return;
+        done = true;
+        clearTimeout(failTimer);
+        btn.disabled = false;
+        setStatus(card, '✕ خطأ شبكة — تعطّل الإرسال', false);
+    };
+    xhr.send(file);
+    });
+}
+
+function clearImage(btn) {
+    const card = btn.closest('.card');
+    card.querySelector('.f-img').value='';
+    card.querySelector('.rimg').style.display='none';
+    setStatus(card, 'ستُحذف بعد الضغط على حفظ', true);
+}
+
+// ================= VOICES & HER PHOTOS =================
+function parseName(f) {
+    const m = f.match(/^puzzle-(\d+)-(.*)-(\d+)\./);
+    return m ? { n:+m[1]+1, who:m[2], ts:new Date(+m[3]) } : null;
+}
+
+async function signedUrl(name) {
+    const r = await fetch(`${SB_URL}/storage/v1/object/sign/voices/${encodeURIComponent(name)}`, {
+        method: 'POST', headers: await authHeaders(),
+        body: JSON.stringify({ expiresIn: 3600 })
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    return `${SB_URL}/storage/v1${j.signedURL}`;
+}
+
+async function loadVoices() {
+    const el = document.getElementById('vlist');
+    try {
+        const r = await fetch(`${SB_URL}/storage/v1/object/list/voices`, {
+            method:'POST', headers: await authHeaders(),
+            body: JSON.stringify({ prefix:'', limit:200, sortBy:{ column:'created_at', order:'desc' } })
+        });
+        const all = (await r.json()).filter(f => f.name !== 'test-upload.webm');
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const isPhoto = f => /^photo-/.test(f.name) || /\.(jpe?g|png|gif|webp)$/i.test(f.name);
+        const imgs = all.filter(isPhoto);
+        const files = all.filter(f => !isPhoto(f));
+        const urls = {};
+        for (const f of all) urls[f.name] = await signedUrl(f.name);
+        document.getElementById('img-grid').innerHTML = imgs.length ? imgs.map(f =>
+            `<a href="${urls[f.name]}" target="_blank">
+                <img src="${urls[f.name]}">
+             </a>`).join('')
+            : '<span style="color:#7d5468;font-size:0.85rem">لا صور بعد</span>';
+        document.getElementById('vcount').textContent = files.length + ' تسجيل';
+        if (!files.length) { el.innerHTML = '<div class="empty">لا رسائل صوتية بعد 🎙️</div>'; return; }
+        el.innerHTML = files.map(f => {
+            const info = parseName(f.name);
+            const url = urls[f.name];
+            const label = info ? `<b>${esc(info.who)}</b> — بعد اللغز رقم ${info.n}` : esc(f.name);
+            const when = info ? info.ts.toLocaleString('ar-DZ') : '';
+            return `<div class="voice-item">
+                <div class="voice-meta"><span>${label}</span><span>${when} · <a href="${url}" target="_blank" style="color:#c2255c">تحميل ⬇</a></span></div>
+                <audio controls preload="none" src="${url}"></audio>
+            </div>`;
+        }).join('');
+    } catch (e) {
+        el.innerHTML = `<div class="empty">⚠️ ${esc(e.message)}</div>`;
+    }
+}
+</script>
+</body>
+</html>

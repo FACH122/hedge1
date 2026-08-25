@@ -1,0 +1,319 @@
+        :root {
+            --primary: #d6336c;
+            --accent: #c2255c;
+            --grad: linear-gradient(135deg, #f783ac 0%, #e64980 50%, #c2255c 100%);
+            --bg-soft: #ffe9f3;
+            --card: #ffffff;
+            --surface: rgba(255, 255, 255, 0.94);
+            --text-main: #44263b;
+            --text-sub: #7d5468;
+            --border: rgba(214, 51, 108, 0.18);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255,182,213,0.28), transparent),
+                radial-gradient(ellipse 60% 40% at 90% 110%, rgba(255,143,177,0.12), transparent),
+                linear-gradient(180deg, #fffafd 0%, #fceef5 100%);
+            color: var(--text-main);
+            font-family: 'Amiri', serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        #fx-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+
+        .page { width: 100%; max-width: 900px; margin: 0 auto; padding: 0 18px 70px; position: relative; z-index: 3; }
+
+        .top-banner {
+            text-align: center; font-family: 'Montserrat', sans-serif; font-size: 0.68rem;
+            letter-spacing: 3px; color: #8a6076; padding: 13px 0; text-transform: uppercase;
+        }
+
+        .brand { text-align: center; cursor: pointer; user-select: none; padding: 10px 0 34px; }
+        .brand h1 {
+            font-size: 2rem; letter-spacing: 2px; font-weight: 700;
+            background: linear-gradient(120deg, #ff8fab, #c2255c, #ff8fab);
+            background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: shimmer 6s linear infinite;
+        }
+        @keyframes shimmer { to { background-position: 200% center; } }
+        .brand span {
+            font-family: 'Montserrat', sans-serif; font-size: 0.62rem; letter-spacing: 6px;
+            color: #8a6076; display: block; margin-top: 5px; text-transform: uppercase;
+        }
+
+        .card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+            box-shadow: 0 14px 40px rgba(214,51,108,0.10);
+            padding: 36px 30px; margin-bottom: 28px; text-align: center;
+        }
+
+        .label {
+            display: flex; align-items: center; justify-content: center; gap: 14px;
+            font-family: 'Montserrat', sans-serif; font-weight: 600;
+            font-size: 0.68rem; letter-spacing: 4px; color: var(--accent);
+            text-transform: uppercase; margin-bottom: 18px;
+        }
+        .label::before, .label::after {
+            content: ''; height: 1px; width: 46px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        }
+
+        .hero {
+            border-radius: 20px; overflow: hidden; position: relative; height: 460px;
+            margin-bottom: 30px; cursor: pointer; border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 30px 60px rgba(214,51,108,0.18);
+        }
+        .hero img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.75; }
+        .hero-content {
+            position: relative; z-index: 2; background: rgba(255,240,248,0.85);
+            backdrop-filter: blur(10px); border: 1px solid var(--border);
+            border-radius: 16px; padding: 34px 38px; max-width: 82%; text-align: center;
+        }
+        .hero-content h2 {
+            font-size: 2.3rem; letter-spacing: 2px; margin-bottom: 10px;
+            background: linear-gradient(120deg, #ff8fab, #c2255c);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero-content p { font-size: 1.15rem; line-height: 2; color: var(--text-main); }
+        .hero-cta {
+            display: inline-block; margin-top: 16px; background: var(--grad); color: #fff;
+            font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 0.72rem;
+            letter-spacing: 2px; padding: 12px 30px; border-radius: 24px;
+        }
+
+        #memory-text { margin-top: 12px; font-size: 1rem; color: var(--text-sub); }
+        #daily-text { font-size: 1.35rem; line-height: 2; color: var(--accent); min-height: 1em; }
+
+        /* REASONS SCRATCH */
+        .reason-box {
+            position: relative; overflow: hidden; min-height: 150px;
+            display: flex; align-items: center; justify-content: center; padding: 26px 20px;
+        }
+        .reason-hint {
+            display: block; font-family: 'Montserrat', sans-serif; font-weight: 600;
+            font-size: 0.62rem; letter-spacing: 3px; color: var(--accent);
+            text-transform: uppercase; margin-bottom: 12px;
+        }
+        #reason-canvas {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            touch-action: none; cursor: crosshair; z-index: 5;
+        }
+        #reason-text { font-size: 1.35rem; line-height: 2; color: var(--accent); margin: 0; }
+
+        #reason-canvas { touch-action: none; }
+
+        /* BUTTONS */
+        .btn {
+            background: var(--grad); color: #fff; border: none; cursor: pointer;
+            padding: 15px 38px; border-radius: 30px; font-family: 'Montserrat', sans-serif;
+            font-size: 0.8rem; font-weight: 700; letter-spacing: 2px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(214,51,108,0.35); }
+        .btn:disabled { opacity: 0.55; cursor: wait; }
+        .btn-ghost {
+            background: transparent; color: var(--accent); border: 1px solid var(--border);
+        }
+
+        /* PUZZLE BOXES */
+        #boxes-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 16px; margin-bottom: 22px;
+        }
+        .box {
+            background: linear-gradient(160deg, #fff 60%, #fff0f7);
+            border: 1px solid var(--border); border-radius: 18px;
+            padding: 26px 12px; text-align: center; cursor: pointer; user-select: none;
+            transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
+            box-shadow: 0 8px 22px rgba(214,51,108,0.08);
+        }
+        .box:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 16px 36px rgba(214,51,108,0.2); }
+        .box .emoji { font-size: 2.5rem; display: block; margin-bottom: 12px; filter: drop-shadow(0 4px 8px rgba(214,51,108,0.25)); }
+        .box .num { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--accent); }
+        .box .sub { font-family: 'Montserrat', sans-serif; font-size: 0.68rem; color: var(--text-sub); margin-top: 6px; letter-spacing: 1px; }
+        .box.solved { opacity: 0.75; }
+        .box.locked { filter: grayscale(0.4); opacity: 0.85; cursor: not-allowed; }
+        .box.open-now { border-color: var(--primary); animation: glowpulse 2.2s ease-in-out infinite alternate; }
+        .box.selected { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 14px 32px rgba(214,51,108,0.28); }
+        @keyframes glowpulse {
+            from { box-shadow: 0 8px 22px rgba(214,51,108,0.10); }
+            to   { box-shadow: 0 10px 30px rgba(214,51,108,0.35); }
+        }
+
+        #box-detail { text-align: center; }
+        #box-detail .progress { font-family: 'Montserrat', sans-serif; font-size: 0.72rem;
+            font-weight: 600; letter-spacing: 2px; color: var(--accent); margin-bottom: 14px; text-transform: uppercase; }
+        #box-question { font-size: 1.45rem; line-height: 2; margin-bottom: 22px; color: var(--text-main); }
+        .answer-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        #box-answer {
+            flex: 1; min-width: 200px; max-width: 340px;
+            background: #fffbfd; border: 1px solid var(--border); border-radius: 30px;
+            padding: 14px 22px; font-family: 'Amiri', serif; font-size: 1.1rem;
+            color: var(--text-main); outline: none;
+        }
+        #box-answer:focus { border-color: var(--primary); }
+        .wrong-msg { margin-top: 16px; color: #e03131; font-size: 1rem; }
+
+        #reward-view { text-align: center; }
+        .reward-badge {
+            font-family: 'Aref Ruqaa', serif; font-size: 1.6rem; margin-bottom: 18px;
+            background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        #reward-image {
+            max-width: min(320px, 90%); border-radius: 14px; margin: 0 auto 18px;
+            display: block; border: 1px solid var(--border);
+            pointer-events: none; -webkit-user-select: none; user-select: none;
+            -webkit-user-drag: none; -webkit-touch-callout: none;
+        }
+        #reward-text { font-size: 1.35rem; line-height: 2.1; color: var(--accent); white-space: pre-line; }
+        .next-hint { margin-top: 16px; color: var(--text-sub); font-size: 0.95rem; }
+
+        .empty-note { color: var(--text-sub); font-size: 1.05rem; line-height: 2; padding: 10px 0; }
+
+        /* RECORDER */
+        .rec-zone { margin-top: 22px; padding-top: 20px; border-top: 1px dashed var(--border); }
+        .rec-divider { color: var(--text-sub); font-size: 0.85rem; letter-spacing: 3px; margin-bottom: 16px; }
+        .rec-timer { font-family: 'Montserrat', sans-serif; font-size: 1.25rem; color: var(--accent); min-width: 54px; }
+        .rec-dot { width: 13px; height: 13px; border-radius: 50%; background: #e03131; display: inline-block; animation: blink 1s steps(1) infinite; }
+        @keyframes blink { 50% { opacity: 0.15; } }
+        .rec-row { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+        .mini-btn {
+            background: #fff; border: 1px solid var(--border); color: var(--accent);
+            padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 0.88rem; font-family: 'Amiri', serif;
+        }
+        .mini-btn:hover { background: #fff0f6; }
+        .rec-player { width: min(320px, 100%); height: 40px; margin: 12px auto 4px; display: block; }
+        .rec-status { font-size: 0.92rem; color: var(--primary); margin-top: 10px; min-height: 1.3em; }
+
+        footer.site-footer {
+            text-align: center; padding: 34px 0 0; color: var(--text-sub);
+            font-family: 'Montserrat', sans-serif; letter-spacing: 3px; font-size: 0.7rem; text-transform: uppercase;
+            border-top: 1px solid var(--border);
+        }
+
+        /* LOADER */
+        #loader-overlay {
+            position: fixed; inset: 0; background: var(--bg-soft); z-index: 999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.7s ease;
+        }
+        #loader-overlay.active { opacity: 1; pointer-events: all; }
+        .loader-emblem { position: relative; width: 90px; height: 90px; margin-bottom: 28px;
+            display: flex; align-items: center; justify-content: center; }
+        .loader-ring { position: absolute; inset: 0; border-radius: 50%;
+            border: 2px solid rgba(214,51,108,0.15); border-top-color: var(--primary);
+            animation: spin 1.3s cubic-bezier(0.68,-0.55,0.27,1.55) infinite; }
+        .loader-diamond { font-size: 1.7rem; animation: pulse 1.4s ease-in-out infinite alternate; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse { from { opacity: 0.45; transform: scale(0.92); } to { opacity: 1; transform: scale(1.1); } }
+        .loader-text { font-family: 'Montserrat', sans-serif; letter-spacing: 5px; color: var(--accent);
+            font-size: 0.95rem; margin-bottom: 6px; text-transform: uppercase; }
+
+        /* POEM PAGE */
+        #poem-container {
+            display: none; max-width: 760px; margin: 0 auto; width: 100%;
+            padding: 60px 20px 90px; opacity: 0; transition: opacity 1.6s ease;
+            position: relative; z-index: 3;
+        }
+        #poem-container.visible { opacity: 1; }
+        header.poem-header { text-align: center; margin-bottom: 50px; position: relative; }
+        header.poem-header h1 {
+            font-family: 'Aref Ruqaa', serif; font-size: 3rem; font-weight: 400; margin-bottom: 16px;
+            background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .divider-ornament {
+            display: flex; align-items: center; justify-content: center; gap: 16px;
+            color: var(--primary); opacity: 0.65; font-size: 0.85rem; margin-top: 4px;
+        }
+        .divider-ornament::before, .divider-ornament::after {
+            content: ''; height: 1px; width: 90px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        }
+        .rename-btn {
+            background: transparent; border: 1px solid var(--border); color: var(--text-sub);
+            font-family: 'Montserrat', sans-serif; font-size: 0.62rem; letter-spacing: 2px;
+            padding: 7px 16px; border-radius: 20px; cursor: pointer; margin-bottom: 12px;
+        }
+        .typed-letter { background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 34px 30px; margin-bottom: 44px; min-height: 100px; }
+        #typed-text { font-size: 1.25rem; line-height: 2.2; color: var(--accent); white-space: pre-line; }
+        #typed-text::after { content: '▎'; animation: caret 0.9s steps(1) infinite; }
+        #typed-text.done::after { content: ''; }
+        @keyframes caret { 50% { opacity: 0; } }
+
+        .stanza {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+            padding: 44px 34px; margin-bottom: 38px; text-align: center; font-size: 1.35rem;
+            line-height: 2.4; box-shadow: 0 20px 50px rgba(214,51,108,0.12);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+            opacity: 0; transform: translateY(24px);
+        }
+        .stanza:hover { border-color: rgba(214,51,108,0.4); box-shadow: 0 24px 56px rgba(214,51,108,0.18); }
+        .stanza.revealed { opacity: 1; transform: none;
+            transition: opacity 1s ease, transform 1s cubic-bezier(0.16,1,0.3,1); }
+        .verse-line { display: block; margin-bottom: 4px; }
+        .highlight { color: var(--primary); font-weight: 700; }
+        .name-reveal {
+            font-family: 'Aref Ruqaa', serif; font-size: 2.2rem;
+            background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            display: inline-block; margin-top: 16px;
+        }
+        footer.poem-footer { text-align: center; margin-top: 50px; color: var(--text-sub);
+            font-family: 'Montserrat', sans-serif; letter-spacing: 3px; font-size: 0.8rem; text-transform: uppercase; }
+        footer.poem-footer .her-name { color: var(--accent); font-family: 'Aref Ruqaa', serif;
+            font-size: 1.3rem; text-transform: none; letter-spacing: 0; }
+        .voice-diamond {
+            width: 56px; height: 56px; margin: 22px auto 0; border-radius: 50%;
+            border: 1px solid var(--border); background: #fff; font-size: 1.25rem;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            animation: pulse 2.2s ease-in-out infinite alternate;
+        }
+        .voice-hint { display: block; font-family: 'Amiri', serif; font-size: 0.95rem; color: var(--text-sub); margin-top: 8px; }
+
+        /* MODALS / TOAST / FLOATERS */
+        .modal-overlay { position: fixed; inset: 0; z-index: 1200; background: rgba(255,214,232,0.75);
+            backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.open { display: flex; }
+        .modal-card { max-width: 580px; width: 100%; max-height: 82vh; overflow-y: auto;
+            background: #fff; border: 1px solid var(--border); border-radius: 18px; padding: 42px 36px;
+            text-align: center; direction: rtl; }
+        .modal-card h4 { font-family: 'Aref Ruqaa', serif; font-size: 1.7rem; color: var(--accent); margin-bottom: 20px; }
+        .modal-card p { font-size: 1.2rem; line-height: 2.1; white-space: pre-line; }
+        .modal-close { margin-top: 26px; background: transparent; border: 1px solid var(--border);
+            color: var(--accent); font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 0.72rem;
+            letter-spacing: 2px; padding: 11px 30px; border-radius: 24px; cursor: pointer; }
+
+        #toast {
+            position: fixed; bottom: 88px; left: 50%; transform: translateX(-50%) translateY(16px);
+            background: #fff; border: 1px solid var(--border); color: var(--accent);
+            padding: 13px 26px; border-radius: 30px; z-index: 1300; font-size: 1rem;
+            opacity: 0; pointer-events: none; transition: all 0.35s ease; box-shadow: 0 10px 30px rgba(214,51,108,0.18);
+        }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        .music-btn {
+            position: fixed; bottom: 22px; right: 20px; z-index: 1100; width: 50px; height: 50px;
+            border-radius: 50%; border: 1px solid var(--border); background: #fff; color: var(--accent);
+            font-size: 1.1rem; cursor: pointer;
+        }
+        .music-btn.playing { animation: pulse 1.5s ease-in-out infinite alternate; }
+
+        #install-btn {
+            display: none; position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; background: var(--grad); color: #fff; border: none; padding: 13px 30px;
+            font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 0.75rem; letter-spacing: 2px;
+            border-radius: 30px; cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            .hero-content h2 { font-size: 1.35rem; }
+            #box-question { font-size: 1.2rem; }
+            header.poem-header h1 { font-size: 2.2rem; }
+            .stanza { font-size: 1.15rem; padding: 28px 20px; }
+        }

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حديقتي السحرية ✦ Wonderland</title>
+
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#ff8fab">
+    <meta name="description" content="حديقة سحرية وردية من الأحلام والمفاجآت">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Wonderland">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <canvas id="fx-canvas"></canvas>
+
+    <!-- MAIN GARDEN PAGE -->
+    <div class="page" id="garden-page">
+        <div class="top-banner">🌸 حديقتي السحرية 🌸</div>
+
+        <div class="brand" id="brand-logo">
+            <h1>Wonderland</h1>
+            <span>عالَمٌ وردِيّ من الأحلام</span>
+        </div>
+
+        <section class="hero trigger-poem">
+            <img class="bg" src="https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=1600&auto=format&fit=crop" alt="Pink Garden">
+            <div class="hero-content">
+                <h2>حديقةُ الأحلام</h2>
+                <p>مكانٌ بنيتُه لكِ... تزهر فيه المفاجآت كلَّ يوم</p>
+                <span class="hero-cta">استكشفي الحديقة ✦</span>
+            </div>
+        </section>
+
+        <div class="card">
+            <span class="label">✦ رسالة اليوم ✦</span>
+            <p id="daily-text"></p>
+            <p id="memory-text"></p>
+        </div>
+
+        <div class="card reason-box">
+            <div style="position:relative;z-index:2;width:100%">
+                <span class="reason-hint">✦ سببٌ من قلبي — اكتشفيه بلمسة ✦</span>
+                <p id="reason-text" style="margin:0">...</p>
+            </div>
+            <canvas id="reason-canvas"></canvas>
+        </div>
+        <div style="text-align:center;margin:-10px 0 26px">
+            <button class="btn btn-ghost" id="reason-btn">✦ سببٌ آخر ✦</button>
+        </div>
+
+        <div class="card" style="padding-bottom:22px">
+            <span class="label">🧩 صناديق الألغاز</span>
+            <p style="color:var(--text-sub);font-size:0.95rem;margin-bottom:18px">كل يومٍ تُفتح صندوقةٌ جديدة... حلّي المفتوح ثم انتظري القادم ✨</p>
+            <div id="boxes-grid"></div>
+
+            <div id="box-detail" style="display:none">
+                <div class="progress" id="box-progress"></div>
+                <p id="box-question"></p>
+                <div class="answer-row">
+                    <input type="text" id="box-answer" placeholder="اكتبي جوابك هنا..." autocomplete="off">
+                    <button class="btn" id="box-submit">تحقّقي</button>
+                </div>
+                <p class="wrong-msg" id="box-wrong" style="display:none">ليس هذا الجواب... فكّري مجددًا ✦</p>
+
+                <div id="reward-view" style="display:none">
+                    <div class="reward-badge">✦ إجابةٌ صحيحة! ✦</div>
+                    <img id="reward-image" alt="" draggable="false" style="display:none">
+                    <p id="reward-text"></p>
+                    <p class="next-hint" id="next-hint"></p>
+                </div>
+
+                <div class="rec-zone" id="rec-zone" style="display:none">
+                    <div class="rec-divider">— ما عرفتي؟ اسأليني —</div>
+                    <button class="mini-btn" id="rec-start">🎤 سجّلي رسالة صوتية</button>
+                    <div id="rec-active" style="display:none">
+                        <div class="rec-row"><span class="rec-dot"></span><span class="rec-timer" id="rec-timer">0:00</span>
+                        <button class="mini-btn" id="rec-stop">■ إيقاف</button></div>
+                    </div>
+                    <div id="rec-review" style="display:none">
+                        <audio controls id="rec-player" class="rec-player"></audio>
+                        <div class="rec-row">
+                            <button class="btn" id="rec-send" style="padding:11px 24px;font-size:0.78rem">✦ إرسالي الصوت</button>
+                            <button class="mini-btn" id="rec-redo">↺ من جديد</button>
+                        </div>
+                    </div>
+                    <div class="rec-row" style="margin-top:12px">
+                        <button class="mini-btn" id="img-pick-btn">📷 أو أرسلي صورة</button>
+                        <input type="file" id="img-input" accept="image/*" style="display:none">
+                    </div>
+                    <p class="rec-status" id="upload-status"></p>
+                </div>
+            </div>
+        </div>
+
+        <footer class="site-footer">✦ صُنعت هذه الحديقة بحبٍّ — لكِ وحدكِ ✦</footer>
+    </div>
+
+    <!-- LOADER -->
+    <div id="loader-overlay">
+        <div class="loader-emblem"><div class="loader-ring"></div><div class="loader-diamond">🌸</div></div>
+        <div class="loader-text">Wonderland</div>
+    </div>
+
+    <!-- POEM PAGE -->
+    <div id="poem-container">
+        <header class="poem-header">
+            <button class="rename-btn" id="rename-btn">غيّري الاسم ✎</button>
+            <h1>حينَ تُغمِضينَ العالم</h1>
+            <div class="divider-ornament">✦ ✤ ✦</div>
+        </header>
+
+        <div class="typed-letter"><p id="typed-text"></p></div>
+        <div id="stanza-list"></div>
+
+        <footer class="poem-footer">
+            <p>✦ Pour Toujours <span class="her-name"></span> ✦</p>
+            <div class="voice-diamond" id="voice-diamond" style="display:none">🎙️</div>
+            <span class="voice-hint" id="voice-hint" style="display:none">اضغطي على الماسة لتسمعي رسالتي</span>
+        </footer>
+
+        <div style="text-align:center;margin-top:36px">
+            <button class="btn btn-ghost" id="return-btn">العودة إلى الحديقة ✦</button>
+        </div>
+    </div>
+
+    <!-- RENAME MODAL -->
+    <div class="modal-overlay" id="rename-modal">
+        <div class="modal-card">
+            <h4>اسمُها؟</h4>
+            <input type="text" id="rename-input" maxlength="30" autocomplete="off"
+                style="width:100%;max-width:280px;padding:13px 18px;border:1px solid var(--border);border-radius:14px;font-family:'Amiri',serif;font-size:1.15rem;text-align:center;color:var(--text-main);outline:none;margin-bottom:8px">
+            <button class="modal-close" id="rename-save">حفظ ✦</button>
+        </div>
+    </div>
+
+    <!-- SECRET LETTER -->
+    <div class="modal-overlay" id="letter-modal">
+        <div class="modal-card">
+            <h4>رسالةٌ سرِّيّة</h4>
+            <p id="hidden-letter-text">وجدتِها...
+
+لم أضع هذه الرسالة هنا عبثًا، وضعتها لمن تبحث عن الأسرار كما أبحث أنا عن وجهكِ في كل حشد.
+
+أحبكِ بقدر ما لا تستطيع هذه الشاشة أن تتسع. ✦</p>
+            <button class="modal-close" data-close="letter-modal">إغلاق ✦</button>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+    <button class="music-btn" id="music-btn" title="الموسيقى">♪</button>
+    <button id="install-btn">✦ Install App</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js" defer></script>
+</body>
+</html>
