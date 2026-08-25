@@ -191,6 +191,12 @@ function showTab(t) {
 
 const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
 const $id = id => document.getElementById(id);
+function setStatus(card, msg, ok) {
+    const el = card.querySelector('.status');
+    if (!el) { showErr(msg); return; }
+    el.textContent = msg;
+    el.className = 'status ' + (ok ? 'ok' : 'err');
+}
 async function saveKey(key, value) {
     if (!DB_OK) throw new Error('جدول content غير موجود — شغّلي أمر SQL أولاً');
     const r = await fetch(`${SB_URL}/rest/v1/content`, {
