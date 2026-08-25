@@ -1,7 +1,7 @@
     'use strict';
     // ================= CONFIG =================
-    const SUPABASE_URL = 'https://gmjvwnqjoiloolyzwwox.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtanZ3bnFqb2lsb29seXp3d294Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2Mjg5MDYsImV4cCI6MjEwMzIwNDkwNn0.lLbHjBbfVRrCM10kTWc-6Tx-ga117soIbED4qpR-s_4';
+    const SUPABASE_URL = 'https://cahufgydkmeqjxgamnxy.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhaHVmZ3lka21lcWp4Z2Ftbnh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2ODkzNTIsImV4cCI6MjEwMzI2NTM1Mn0.3ZqR71brJbGLjrYqCR1ZNQ-zutOaLSa6hSb8oTN7os4';
     const VOICE_NOTE_FILE = 'voice.mp3';
 
     if (location.search.includes('reset')) {

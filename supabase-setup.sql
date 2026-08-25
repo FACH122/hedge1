@@ -8,7 +8,19 @@
 --   use to log into admin.html
 -- ============================================================
 
--- ---------- 1. content table: everyone reads, only admin writes ----------
+-- ---------- 1. content table: site texts/puzzles/poem ----------
+create table if not exists public.content (
+    key   text primary key,
+    value jsonb not null default 'null'::jsonb
+);
+
+-- seed default rows so admin has something to edit
+insert into public.content (key, value) values
+    ('puzzles', '[]'::jsonb),
+    ('texts', '{}'::jsonb),
+    ('poem', '[]'::jsonb)
+on conflict (key) do nothing;
+
 alter table public.content enable row level security;
 
 drop policy if exists "public read content" on public.content;
