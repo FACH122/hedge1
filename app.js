@@ -168,7 +168,7 @@
             $id('letter-modal').classList.add('open');
         }
     });
-    document.querySelectorAll('.modal-close').forEach(b =>
+    document.querySelectorAll('.modal-close[data-close]').forEach(b =>
         b.addEventListener('click', () => $id(b.dataset.close).classList.remove('open')));
     document.querySelectorAll('.modal-overlay').forEach(ov =>
         ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open'); }));
