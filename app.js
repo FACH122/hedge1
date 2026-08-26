@@ -377,10 +377,19 @@
     const FALLBACK_BALLOON_MSGS = ['أنتِ أجمل ما حدث لي.', 'تفكيري فيكِ يسعفني.', 'صوتكِ وطنٌ آمن.', 'قلبي يسكن عندكِ.', 'كل يومٌ معكِ احتفال.'];
     const FALLBACK_HEART_MSG = 'أنتِ نبضُ قلبي كلِّه.';
     const FALLBACK_GIFT_MSG = 'أجمل ما في حياتي... أنتِ.';
+    const FALLBACK_MEMORY_LETTER = 'طابقتِ كلَّ الصور... مثلنا تمامًا. ✦';
+    const FALLBACK_STARS_MSG = 'حتى النجوم ترسمُ قلوبًا حينَ أفكّر فيكِ.';
+    const FALLBACK_CANDLES_TITLE = '✦ أمنيتي ✦';
+    const FALLBACK_CANDLES_MSG = 'انفختِها كلَّها... وكل أمنياتكِ عندي مستجابة.';
 
     function intBalloonMessages() { return (Array.isArray(interactions.balloonMessages) && interactions.balloonMessages.length) ? interactions.balloonMessages : FALLBACK_BALLOON_MSGS; }
     function intHeartMessage() { return interactions.heartMessage || FALLBACK_HEART_MSG; }
     function intGiftMessage() { return interactions.giftMessage || FALLBACK_GIFT_MSG; }
+    function intMemoryImages() { return (Array.isArray(interactions.memoryImages) ? interactions.memoryImages.filter(u => u) : []).slice(0, 6); }
+    function intMemoryLetter() { return interactions.memoryLetter || FALLBACK_MEMORY_LETTER; }
+    function intStarsMessage() { return interactions.starsMessage || FALLBACK_STARS_MSG; }
+    function intCandlesTitle() { return interactions.candlesTitle || FALLBACK_CANDLES_TITLE; }
+    function intCandlesMessage() { return interactions.candlesMessage || FALLBACK_CANDLES_MSG; }
 
     function revealMessage(title, text) {
         $id('reveal-title').textContent = title;
@@ -402,14 +411,11 @@
     }
 
     function applyInteractions() {
-        const vis = interactions.visibility || {};
-        document.getElementById('balloons-card').style.display = vis.balloons === false ? 'none' : '';
-        document.getElementById('heart-card').style.display = vis.heart === false ? 'none' : '';
-        document.getElementById('gift-card').style.display = vis.gift === false ? 'none' : '';
-        const slideOk = vis.slide !== false && !!interactions.slideImage;
-        document.getElementById('slide-card').style.display = slideOk ? '' : 'none';
         initBalloons();
-        if (slideOk) initSlide();
+        initSlide();
+        initMemory();
+        initStars();
+        initCandles();
     }
 
     // HEART
@@ -503,7 +509,10 @@
         }).join('');
     }
     function initSlide() {
-        if (!interactions.slideImage) return;
+        if (!interactions.slideImage) { document.getElementById('slide-card').style.display = 'none'; return; }
+        const vis = (interactions.visibility || {}).slide !== false;
+        document.getElementById('slide-card').style.display = vis ? '' : 'none';
+        if (!vis) return;
         slideTiles = [0, 1, 2, 3, 4, 5, 6, 7, 8];
         slideEmpty = 8;
         slideDone = false;
@@ -536,11 +545,201 @@
     });
     $id('slide-reset').addEventListener('click', initSlide);
 
+    // MEMORY MATCH
+    let memFirst = null, memLock = false, memMatched = 0, memTotal = 0;
+    function initMemory() {
+        const imgs = intMemoryImages();
+        const vis = (interactions.visibility || {}).memory !== false;
+        const ok = vis && imgs.length >= 2;
+        document.getElementById('memory-card').style.display = ok ? '' : 'none';
+        if (!ok) return;
+        memFirst = null; memLock = false; memMatched = 0; memTotal = imgs.length;
+        const deck = [...imgs, ...imgs].sort(() => Math.random() - 0.5);
+        document.getElementById('memory-board').innerHTML = deck.map((u, i) =>
+            `<div class="mem-card" data-i="${i}" data-u="${esc(u)}">
+                <div class="mem-inner">
+                    <div class="mem-face mem-front">✦</div>
+                    <div class="mem-face mem-back" style="background-image:url('${esc(u)}')"></div>
+                </div>
+            </div>`).join('');
+        document.getElementById('memory-hint').textContent = 'طابقي الصور المتشابهة';
+    }
+    document.getElementById('memory-board').addEventListener('pointerdown', e => {
+        if (memLock) return;
+        const card = e.target.closest('.mem-card');
+        if (!card || card.classList.contains('flipped')) return;
+        card.classList.add('flipped');
+        if (!memFirst) { memFirst = card; return; }
+        if (memFirst.dataset.u === card.dataset.u) {
+            memFirst = null;
+            memMatched++;
+            playChime();
+            if (memMatched === memTotal) {
+                burst(innerWidth / 2, innerHeight / 2, 80);
+                revealMessage('🧩 أحسنتِ!', intMemoryLetter());
+                if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
+            }
+        } else {
+            memLock = true;
+            const a = memFirst;
+            memFirst = null;
+            setTimeout(() => { a.classList.remove('flipped'); card.classList.remove('flipped'); memLock = false; }, 800);
+        }
+    });
+    $id('memory-reset').addEventListener('click', initMemory);
+
+    // CONNECT THE STARS
+    const stCanvas = document.getElementById('stars-canvas');
+    const stx = stCanvas.getContext('2d');
+    let stars = [], starCurrent = 0, starDone = false, starDrag = null, starPos = null;
+    function initStars() {
+        const vis = (interactions.visibility || {}).stars !== false;
+        document.getElementById('stars-card').style.display = vis ? '' : 'none';
+        if (!vis) return;
+        stCanvas.width = stCanvas.offsetWidth || 340;
+        stCanvas.height = 300;
+        const n = 12, cx = stCanvas.width / 2, cy = 140, S = Math.min(stCanvas.width / 40, 8.2);
+        stars = [];
+        for (let i = 0; i < n; i++) {
+            const t = Math.PI * 2 * i / n;
+            const hx = 16 * Math.pow(Math.sin(t), 3);
+            const hy = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+            stars.push({ x: cx + hx * S, y: cy + hy * S });
+        }
+        starCurrent = 0; starDone = false; starDrag = null; starPos = null;
+        drawStars();
+    }
+    function drawStars() {
+        stx.clearRect(0, 0, stCanvas.width, stCanvas.height);
+        stx.strokeStyle = '#e64980'; stx.lineWidth = 2.5; stx.lineCap = 'round';
+        for (let i = 0; i < starCurrent; i++) {
+            const a = stars[i], b = stars[(i + 1) % stars.length];
+            stx.beginPath(); stx.moveTo(a.x, a.y); stx.lineTo(b.x, b.y); stx.stroke();
+        }
+        if (starDrag !== null && starPos) {
+            stx.strokeStyle = 'rgba(230,73,128,0.4)';
+            stx.beginPath(); stx.moveTo(stars[starDrag].x, stars[starDrag].y); stx.lineTo(starPos.x, starPos.y); stx.stroke();
+        }
+        stars.forEach((s, i) => {
+            stx.fillStyle = starDone ? '#c2255c' : (i <= starCurrent ? '#e64980' : '#ffb3cf');
+            stx.beginPath(); stx.arc(s.x, s.y, i === starCurrent && !starDone ? 10 : 6.5, 0, 6.283); stx.fill();
+            stx.fillStyle = '#fff'; stx.font = '9px Montserrat, sans-serif';
+            stx.textAlign = 'center'; stx.textBaseline = 'middle';
+            stx.fillText(i + 1, s.x, s.y);
+        });
+    }
+    function starAt(x, y) {
+        return stars.findIndex(s => (x - s.x) ** 2 + (y - s.y) ** 2 < 32 * 32);
+    }
+    function starXY(e) {
+        const rect = stCanvas.getBoundingClientRect();
+        return { x: (e.clientX - rect.left) * (stCanvas.width / rect.width), y: (e.clientY - rect.top) * (stCanvas.height / rect.height) };
+    }
+    stCanvas.addEventListener('pointerdown', e => {
+        if (starDone) return;
+        const p = starXY(e);
+        const idx = starAt(p.x, p.y);
+        if (idx === starCurrent) {
+            starDrag = idx;
+            starPos = p;
+            stCanvas.setPointerCapture(e.pointerId);
+            drawStars();
+        }
+    });
+    stCanvas.addEventListener('pointermove', e => {
+        if (starDrag === null) return;
+        starPos = starXY(e);
+        drawStars();
+    });
+    stCanvas.addEventListener('pointerup', e => {
+        if (starDrag === null) return;
+        const p = starXY(e);
+        const idx = starAt(p.x, p.y);
+        if (idx === (starDrag + 1) % stars.length) {
+            starCurrent++;
+            playChime();
+            if (starCurrent === stars.length) {
+                starDone = true;
+                burst(innerWidth / 2, innerHeight / 2, 80);
+                revealMessage('🌌', intStarsMessage());
+            }
+        }
+        starDrag = null;
+        starPos = null;
+        drawStars();
+    });
+    $id('stars-reset').addEventListener('click', initStars);
+
+    // BLOW THE CANDLES
+    let candleOut = 0, candleTotal = 3, candleDone = false, micStream = null;
+    function initCandles() {
+        const vis = (interactions.visibility || {}).candles === true;
+        document.getElementById('candles-card').style.display = vis ? '' : 'none';
+        if (!vis) { stopCandleMic(); return; }
+        candleOut = 0; candleDone = false;
+        stopCandleMic();
+        document.getElementById('candles-row').innerHTML =
+            Array.from({ length: candleTotal }, (_, i) => `<div class="candle" data-i="${i}"><div class="flame"></div></div>`).join('');
+        document.getElementById('candles-start').style.display = '';
+        document.getElementById('candles-relight').style.display = 'none';
+    }
+    function stopCandleMic() {
+        if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+    }
+    function extinguishCandle(i) {
+        const c = document.querySelectorAll('#candles-row .candle')[i];
+        if (!c || c.classList.contains('out')) return;
+        c.classList.add('out');
+        candleOut++;
+        if (candleOut === candleTotal && !candleDone) {
+            candleDone = true;
+            stopCandleMic();
+            burst(innerWidth / 2, innerHeight / 2, 60);
+            playChime();
+            revealMessage(intCandlesTitle(), intCandlesMessage());
+            document.getElementById('candles-start').style.display = 'none';
+            document.getElementById('candles-relight').style.display = '';
+        }
+    }
+    document.getElementById('candles-row').addEventListener('pointerdown', e => {
+        const c = e.target.closest('.candle');
+        if (c) extinguishCandle(+c.dataset.i);
+    });
+    $id('candles-start').addEventListener('click', async () => {
+        try {
+            micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const ac = new (window.AudioContext || window.webkitAudioContext)();
+            const analyser = ac.createAnalyser();
+            analyser.fftSize = 512;
+            ac.createMediaStreamSource(micStream).connect(analyser);
+            const data = new Uint8Array(analyser.frequencyBinCount);
+            let lastBlow = 0;
+            showToast('انفخي الآن 🎤');
+            const tick = () => {
+                if (!micStream) return;
+                analyser.getByteFrequencyData(data);
+                let sum = 0;
+                for (const v of data) sum += v;
+                if (sum / data.length > 55 && Date.now() - lastBlow > 500) {
+                    lastBlow = Date.now();
+                    extinguishCandle(candleOut);
+                }
+                requestAnimationFrame(tick);
+            };
+            tick();
+        } catch (e) {
+            showToast('اسمحي بالوصول للميكروفون — أو المسِ الشموع بإصبعك');
+        }
+    });
+    $id('candles-relight').addEventListener('click', initCandles);
+
     const bCanvas = document.getElementById('balloon-canvas');
     const bcx = bCanvas.getContext('2d');
     const BALLOON_COLORS = ['#f783ac', '#e64980', '#ffa8c5', '#c2255c', '#ff8fab', '#d6336c', '#f9c0d5'];
     let balloons = [], bw = 0, bh = 260;
     function initBalloons() {
+        const vis = (interactions.visibility || {}).balloons !== false;
+        document.getElementById('balloons-card').style.display = vis ? '' : 'none';
         bw = bCanvas.width = bCanvas.offsetWidth || 300;
         bh = bCanvas.height = 260;
         const msgs = intBalloonMessages();

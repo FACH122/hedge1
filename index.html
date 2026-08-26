@@ -18,7 +18,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="styles.css?v=17">
+    <link rel="stylesheet" href="styles.css?v=18">
 </head>
 <body>
 
@@ -88,6 +88,31 @@
             <div class="slide-board" id="slide-board"></div>
             <p class="hint-line" id="slide-hint" style="margin-top:12px">حركّي المربعات حتى تكتمل الصورة</p>
             <button class="btn btn-ghost" id="slide-reset">✦ خلط من جديد ✦</button>
+        </div>
+
+        <div class="card" id="memory-card" style="text-align:center">
+            <span class="label">✦ لعبة الذاكرة ✦</span>
+            <div class="memory-board" id="memory-board"></div>
+            <p class="hint-line" id="memory-hint" style="margin-top:12px">طابقي الصور المتشابهة</p>
+            <button class="btn btn-ghost" id="memory-reset">✦ لعبة جديدة ✦</button>
+        </div>
+
+        <div class="card" id="stars-card" style="text-align:center">
+            <span class="label">✦ رسم النجوم ✦</span>
+            <canvas id="stars-canvas" style="width:100%;max-width:340px"></canvas>
+            <p class="hint-line">صلي النجوم بالترتيب: من كل نجمة مرقّمة إلى التي تليها</p>
+            <button class="btn btn-ghost" id="stars-reset">✦ من جديد ✦</button>
+        </div>
+
+        <div class="card" id="candles-card" style="text-align:center">
+            <span class="label" id="candles-label">✦ انفخي الشموع ✦</span>
+            <div class="cake-stage">
+                <div class="candles-row" id="candles-row"></div>
+                <div class="cake-emoji">🎂</div>
+            </div>
+            <p class="hint-line">انفخي في الميكروفون — أو المسِ الشموع بإصبعك</p>
+            <button class="mini-btn" id="candles-start">🎤 جاهزة؟ اضغطي ثم انفخي</button>
+            <button class="btn btn-ghost" id="candles-relight" style="display:none">✦ أشعليها من جديد ✦</button>
         </div>
 
         <div class="card" style="padding-bottom:22px">
@@ -203,6 +228,6 @@
     <button id="install-btn">✦ Install App</button>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=17" defer></script>
+    <script src="app.js?v=18" defer></script>
 </body>
 </html>

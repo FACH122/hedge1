@@ -355,3 +355,30 @@
             border: 1px solid var(--border); border-radius: 12px; padding: 4px; }
         .slide-tile { border-radius: 8px; cursor: pointer; background-size: 300% 300%; transition: transform 0.15s ease; }
         .slide-tile:hover { transform: scale(0.97); }
+
+        .memory-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+            max-width: 340px; margin: 0 auto; }
+        .mem-card { position: relative; aspect-ratio: 3/4; cursor: pointer; }
+        .mem-inner { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform 0.5s; }
+        .mem-card.flipped .mem-inner { transform: rotateY(180deg); }
+        .mem-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(214,51,108,0.12); }
+        .mem-front { background: linear-gradient(160deg, #f8bbd0, #ec407a); font-size: 1.5rem; color: #fff; }
+        .mem-back { transform: rotateY(180deg); background-size: cover; background-position: center;
+            border: 1px solid var(--border); }
+
+        #stars-canvas { height: 300px; display: block; margin: 0 auto; touch-action: none; }
+
+        .cake-stage { display: flex; flex-direction: column; align-items: center; padding: 8px 0 4px; }
+        .candles-row { display: flex; justify-content: center; gap: 18px; margin-bottom: 2px; }
+        .candle { width: 11px; height: 36px; background: linear-gradient(#fff, #ffd8e4);
+            border: 1px solid #f3d3e1; border-radius: 3px; position: relative; cursor: pointer; }
+        .flame { position: absolute; top: -19px; left: 50%; transform: translateX(-50%);
+            width: 13px; height: 20px; background: radial-gradient(#fff3bf 20%, #ff922b 80%);
+            border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+            animation: flicker 0.3s ease-in-out infinite alternate;
+            transition: opacity 0.4s ease; }
+        .candle.out .flame { opacity: 0; animation: none; }
+        @keyframes flicker { from { transform: translateX(-50%) scale(1); } to { transform: translateX(-50%) scale(1.18) rotate(4deg); } }
+        .cake-emoji { font-size: 4.6rem; line-height: 1; }
