@@ -1,4 +1,4 @@
-const CACHE_NAME = 'maison-eternite-v46';
+const CACHE_NAME = 'maison-eternite-v47';
 const APP_SHELL = [
     './',
     './index.html',
@@ -69,7 +69,24 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Cache-first for same-origin static assets
+    // Network-first for JS/CSS so code updates always reach users,
+    // fall back to cache when offline
+    if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
+        event.respondWith(
+            fetch(request)
+                .then((response) => {
+                    if (response.ok) {
+                        const copy = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+                    }
+                    return response;
+                })
+                .catch(() => caches.match(request))
+        );
+        return;
+    }
+
+    // Cache-first for other same-origin static assets (images, fonts)
     event.respondWith(
         caches.match(request).then((cached) => {
             if (cached) return cached;
