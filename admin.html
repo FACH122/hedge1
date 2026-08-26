@@ -730,7 +730,7 @@ async function loadStats() {
     const body = document.getElementById('stats-body');
     body.innerHTML = '<div class="loading">...جاري التحليل</div>';
     try {
-        const r = await fetch(`${SB_URL}/rest/v1/analytics_events?select=client_id,name,section,detail&limit=5000`, { headers: await authHeaders() });
+        const r = await fetch(`${SB_URL}/rest/v1/analytics_events?select=client_id,name,section,detail,created_at&limit=5000&order=created_at.desc`, { headers: await authHeaders() });
         if (!r.ok) throw new Error((await r.json().catch(() => ({}))).message || r.status);
         const rows = await r.json();
         loadStats._loaded = true;
@@ -809,6 +809,49 @@ function renderStats(rows) {
         html += `<div class="card"><label style="margin-top:0">🙈 أقسام لم تصل إليها بعد</label>
             <p style="font-size:0.95rem">${ignored.map(s => SEC_NAMES[s]).join(' · ')}</p></div>`;
     }
+
+    const answers = rows.filter(r => r.name === 'answer');
+    if (answers.length) {
+        html += `<div class="card"><label style="margin-top:0">✍️ أجوبتها في الألغاز</label>
+        <table style="width:100%;border-collapse:collapse;font-size:0.85rem;text-align:center">
+        <tr style="color:#c2255c"><th style="padding:6px">التوقيت</th><th>اللغز</th><th>جوابها</th><th>النتيجة</th><th>فكّرت مدة</th></tr>`;
+        for (const a of answers) {
+            const d = a.detail || {};
+            html += `<tr style="border-top:1px solid #f3d3e1">
+                <td style="padding:6px">${new Date(a.created_at).toLocaleString('ar-DZ')}</td>
+                <td>${esc(String(d.qid || '').slice(0, 8))}</td>
+                <td style="text-align:right">${esc(d.text || '')}</td>
+                <td>${d.correct ? '✅' : '❌'}</td>
+                <td>${d.thinkMs ? (d.thinkMs / 1000).toFixed(0) + ' ث' : '—'}</td>
+            </tr>`;
+        }
+        html += '</table></div>';
+    }
+
+    const typings = rows.filter(r => r.name === 'typing').slice(0, 100);
+    if (typings.length) {
+        html += `<div class="card"><label style="margin-top:0">⌨️ أثناء الكتابة (آخر ${typings.length} لقطة)</label>
+        <table style="width:100%;border-collapse:collapse;font-size:0.85rem;text-align:center">
+        <tr style="color:#c2255c"><th style="padding:6px">التوقيت</th><th>المكان</th><th>ما كتبته</th></tr>`;
+        for (const t of typings) {
+            const d = t.detail || {};
+            const place = t.section === 'rename' ? '✏️ الاسم' : '🧩 لغز ' + esc(String(d.qid || '').slice(0, 8));
+            html += `<tr style="border-top:1px solid #f3d3e1">
+                <td style="padding:6px">${new Date(t.created_at).toLocaleString('ar-DZ')}</td>
+                <td>${place}</td>
+                <td style="text-align:right">${esc(d.text || '')}</td>
+            </tr>`;
+        }
+        html += '</table></div>';
+    }
+
+    const renames = rows.filter(r => r.name === 'rename');
+    if (renames.length) {
+        html += `<div class="card"><label style="margin-top:0">✏️ تغييرات الاسم</label><p style="font-size:0.95rem;line-height:2">` +
+            renames.map(r => `${esc((r.detail || {}).text || '')} <small style="color:#7d5468">(${new Date(r.created_at).toLocaleString('ar-DZ')})</small>`).join(' · ') +
+            `</p></div>`;
+    }
+
     return html;
 }
 

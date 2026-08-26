@@ -20,6 +20,8 @@
     let interactions = {};
     let poemData = null;
     let activeBox = null;
+    let boxShownAt = 0;
+    let lastTypedSent = '';
 
     function getHerName() { return localStorage.getItem('herName') || 'هاجَر'; }
 
@@ -246,6 +248,7 @@
         const n = $id('rename-input').value.trim();
         if (n) {
             localStorage.setItem('herName', n);
+            trackEvent('rename', 'rename', { text: n });
             solvedIds = [];
             await pullProgress();
             applyName();
@@ -254,6 +257,17 @@
             showToast('✦ تم');
         }
         $id('rename-modal').classList.remove('open');
+    });
+    $id('rename-input').addEventListener('input', () => {
+        const el = $id('rename-input');
+        clearTimeout(el._t);
+        el._t = setTimeout(() => {
+            const v = $id('rename-input').value;
+            if (v.trim() && v !== lastTypedSent) {
+                lastTypedSent = v;
+                trackEvent('typing', 'rename', { text: v });
+            }
+        }, 2000);
     });
     $id('rename-input').addEventListener('keydown', e => {
         if (e.key === 'Enter') $id('rename-save').click();
@@ -851,6 +865,7 @@
 
     function openDetail(p, i) {
         activeBox = p;
+        boxShownAt = Date.now();
         $id('boxes-grid').querySelectorAll('.box').forEach((b, j) =>
             b.classList.toggle('selected', j === i));
         showOnly('box-detail');
@@ -884,12 +899,30 @@
         if (!p) return;
         const val = $id('box-answer').value;
         if (!val.trim()) return;
-        if ((p.a || []).some(a => normAnswer(a) === normAnswer(val))) {
+        const correct = (p.a || []).some(a => normAnswer(a) === normAnswer(val));
+        trackEvent('answer', 'boxes', {
+            qid: p.qid,
+            text: val.trim(),
+            correct,
+            thinkMs: boxShownAt ? Date.now() - boxShownAt : 0
+        });
+        if (correct) {
             solveBox(p);
         } else {
             $id('box-wrong').style.display = 'block';
             setTimeout(() => $id('box-wrong').style.display = 'none', 3500);
         }
+    });
+    $id('box-answer').addEventListener('input', () => {
+        const el = $id('box-answer');
+        clearTimeout(el._t);
+        el._t = setTimeout(() => {
+            const v = $id('box-answer').value;
+            if (v.trim() && v !== lastTypedSent) {
+                lastTypedSent = v;
+                trackEvent('typing', 'boxes', { qid: activeBox ? activeBox.qid : null, text: v });
+            }
+        }, 2000);
     });
     $id('box-answer').addEventListener('keydown', e => {
         if (e.key === 'Enter') $id('box-submit').click();
