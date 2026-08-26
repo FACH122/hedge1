@@ -262,12 +262,12 @@
         const el = $id('rename-input');
         clearTimeout(el._t);
         el._t = setTimeout(() => {
-            const v = $id('rename-input').value;
+            const v = el.value;
             if (v.trim() && v !== lastTypedSent) {
                 lastTypedSent = v;
                 trackEvent('typing', 'rename', { text: v });
             }
-        }, 2000);
+        }, 1500);
     });
     $id('rename-input').addEventListener('keydown', e => {
         if (e.key === 'Enter') $id('rename-save').click();
@@ -866,6 +866,7 @@
     function openDetail(p, i) {
         activeBox = p;
         boxShownAt = Date.now();
+        lastTypedSent = '';
         $id('boxes-grid').querySelectorAll('.box').forEach((b, j) =>
             b.classList.toggle('selected', j === i));
         showOnly('box-detail');
@@ -900,12 +901,16 @@
         const val = $id('box-answer').value;
         if (!val.trim()) return;
         const correct = (p.a || []).some(a => normAnswer(a) === normAnswer(val));
+        clearTimeout($id('box-answer')._t);
+        sendTypingSnapshot();
         trackEvent('answer', 'boxes', {
             qid: p.qid,
             text: val.trim(),
             correct,
             thinkMs: boxShownAt ? Date.now() - boxShownAt : 0
         });
+        anFlush();
+        lastTypedSent = '';
         if (correct) {
             solveBox(p);
         } else {
@@ -913,16 +918,24 @@
             setTimeout(() => $id('box-wrong').style.display = 'none', 3500);
         }
     });
+    function sendTypingSnapshot() {
+        const el = $id('box-answer');
+        const v = el.value;
+        if (v.trim() && v !== lastTypedSent) {
+            lastTypedSent = v;
+            trackEvent('typing', 'boxes', { qid: activeBox ? activeBox.qid : null, text: v });
+            return true;
+        }
+        return false;
+    }
     $id('box-answer').addEventListener('input', () => {
         const el = $id('box-answer');
         clearTimeout(el._t);
-        el._t = setTimeout(() => {
-            const v = $id('box-answer').value;
-            if (v.trim() && v !== lastTypedSent) {
-                lastTypedSent = v;
-                trackEvent('typing', 'boxes', { qid: activeBox ? activeBox.qid : null, text: v });
-            }
-        }, 2000);
+        el._t = setTimeout(sendTypingSnapshot, 1500);
+    });
+    $id('box-answer').addEventListener('blur', () => {
+        clearTimeout($id('box-answer')._t);
+        if (sendTypingSnapshot()) anFlush();
     });
     $id('box-answer').addEventListener('keydown', e => {
         if (e.key === 'Enter') $id('box-submit').click();

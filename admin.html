@@ -251,7 +251,7 @@ function showTab(t) {
         document.getElementById('tab-'+x).style.display = x===t ? '' : 'none');
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.t===t));
     if (t==='voices') loadVoices();
-    if (t==='stats' && !loadStats._loaded) loadStats();
+    if (t==='stats') loadStats();
 }
 
 const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
@@ -733,7 +733,6 @@ async function loadStats() {
         const r = await fetch(`${SB_URL}/rest/v1/analytics_events?select=client_id,name,section,detail,created_at&limit=5000&order=created_at.desc`, { headers: await authHeaders() });
         if (!r.ok) throw new Error((await r.json().catch(() => ({}))).message || r.status);
         const rows = await r.json();
-        loadStats._loaded = true;
         body.innerHTML = renderStats(rows);
     } catch (e) {
         body.innerHTML = `<div class="empty" style="color:#e03131">⚠️ ${esc(e.message)}<br><br>إذا ظهرت رسالة "relation does not exist" شغّلي أمر SQL المحدث (supabase-setup.sql) أولاً</div>`;
