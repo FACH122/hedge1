@@ -76,6 +76,7 @@
             <button class="tab-btn active" data-t="puzzles" onclick="showTab('puzzles')">🧩 الألغاز</button>
             <button class="tab-btn" data-t="texts" onclick="showTab('texts')">💬 النصوص</button>
             <button class="tab-btn" data-t="poem" onclick="showTab('poem')">📜 القصيدة</button>
+            <button class="tab-btn" data-t="inter" onclick="showTab('inter')">✨ التفاعلات</button>
             <button class="tab-btn" data-t="voices" onclick="showTab('voices')">🎙️ رسائلها</button>
         </div>
 
@@ -122,6 +123,23 @@
                 <button class="tbtn" onclick="loadAll()">↺ استعادة المحفوظ</button>
             </div>
             <p class="status" id="poem-status" style="text-align:center"></p>
+        </div>
+
+        <div id="tab-inter" style="display:none">
+            <label class="lbl">💌 رسالة المظروف المختوم — استخدمي {name} لاسمها</label>
+            <textarea class="big-ta" id="ta-envelope"></textarea>
+
+            <label class="lbl">🥠 حكم كوكيز الحظ (حظ في كل سطر)</label>
+            <textarea class="big-ta" id="ta-cookie"></textarea>
+
+            <label class="lbl">🎈 رسائل البالونات (رسالة في كل سطر)</label>
+            <textarea class="big-ta" id="ta-balloons"></textarea>
+
+            <div class="toolbar" style="margin-top:16px">
+                <button class="save" onclick="saveInteractions()">💾 حفظ التفاعلات</button>
+                <button class="tbtn" onclick="loadAll()">↺ استعادة المحفوظ</button>
+            </div>
+            <p class="status" id="inter-status" style="text-align:center"></p>
         </div>
 
         <div id="tab-voices" style="display:none">
@@ -183,7 +201,7 @@ async function enter() {
 if (sessionStorage.getItem('ok')==='1') enter();
 
 function showTab(t) {
-    ['puzzles','texts','poem','voices'].forEach(x =>
+    ['puzzles','texts','poem','inter','voices'].forEach(x =>
         document.getElementById('tab-'+x).style.display = x===t ? '' : 'none');
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.t===t));
     if (t==='voices') loadVoices();
@@ -240,6 +258,10 @@ async function loadAll() {
                 ? map.poem.map(block => block.join('\n')).join('\n\n')
                 : '';
         }
+        INT_RAW = map.interactions || {};
+        $id('ta-envelope').value = INT_RAW.envelopeLetter || '';
+        $id('ta-cookie').value = (INT_RAW.fortunes || []).join('\n');
+        $id('ta-balloons').value = (INT_RAW.balloonMessages || []).join('\n');
     } catch (e) {
         document.getElementById('plist').innerHTML =
             `<div class="empty">⚠️ خطأ اتصال: ${esc(e.message)}</div>`;
@@ -391,6 +413,7 @@ function newPuzzle() {
 
 // ================= TEXTS =================
 let T = {};
+let INT_RAW = {};
 
 function fillTexts() {
     $id('ta-daily').value = (T.dailyMessages||[]).join('\n');
@@ -411,6 +434,23 @@ async function saveTexts() {
             reasons: $id('ta-reasons').value.split('\n').map(s=>s.trim()).filter(Boolean),
             hiddenLetter: $id('ta-letter').value.trim(),
             typedLetter: $id('ta-typed').value.trim()
+        });
+        st.textContent = '✔ حُفظ — الموقع تحدث تلقائياً!';
+    } catch (e) {
+        st.textContent = '✕ خطأ: ' + e.message; st.className = 'status err';
+    }
+}
+
+// ================= INTERACTIONS =================
+async function saveInteractions() {
+    const st = document.getElementById('inter-status');
+    st.textContent = '...جاري الحفظ'; st.className = 'status ok';
+    try {
+        await saveKey('interactions', {
+            ...INT_RAW,
+            envelopeLetter: $id('ta-envelope').value.trim(),
+            fortunes: $id('ta-cookie').value.split('\n').map(s => s.trim()).filter(Boolean),
+            balloonMessages: $id('ta-balloons').value.split('\n').map(s => s.trim()).filter(Boolean)
         });
         st.textContent = '✔ حُفظ — الموقع تحدث تلقائياً!';
     } catch (e) {

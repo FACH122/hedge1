@@ -18,7 +18,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="styles.css?v=9">
+    <link rel="stylesheet" href="styles.css?v=14">
 </head>
 <body>
 
@@ -57,6 +57,34 @@
         </div>
         <div style="text-align:center;margin:-10px 0 26px">
             <button class="btn btn-ghost" id="reason-btn">✦ سببٌ آخر ✦</button>
+        </div>
+
+        <div class="card" id="envelope-card">
+            <span class="label">✦ رسالة مختومة ✦</span>
+            <div class="env-stage">
+                <div class="envelope" id="envelope">
+                    <div class="env-body"></div>
+                    <div class="env-letter"><p id="env-letter-text"></p></div>
+                    <canvas id="env-seal"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="cookie-card" style="text-align:center">
+            <span class="label">✦ حظّ اليوم ✦</span>
+            <div class="cookie" id="cookie">🥠</div>
+            <p class="hint-line">اضغطي على الكوكيز لتكتشفي حظّك</p>
+            <div class="fortune-paper"><p id="fortune-text"></p></div>
+            <button class="btn btn-ghost" id="cookie-again" style="margin-top:14px">✦ حظّ آخر ✦</button>
+        </div>
+
+        <div class="card" id="balloons-card">
+            <span class="label">✦ بالونات المفاجآت ✦</span>
+            <p class="hint-line" style="text-align:center">المسي أي بالون لتكتشفي ما بداخله</p>
+            <canvas id="balloon-canvas"></canvas>
+            <div style="text-align:center;margin-top:6px">
+                <button class="btn btn-ghost" id="balloon-reset">✦ أعيدي البالونات ✦</button>
+            </div>
         </div>
 
         <div class="card" style="padding-bottom:22px">
@@ -144,6 +172,15 @@
         </div>
     </div>
 
+    <!-- REVEAL POPUP -->
+    <div class="modal-overlay" id="reveal-modal">
+        <div class="modal-card">
+            <h4 id="reveal-title"></h4>
+            <p id="reveal-text"></p>
+            <button class="modal-close" data-close="reveal-modal">إغلاق ✦</button>
+        </div>
+    </div>
+
     <!-- SECRET LETTER -->
     <div class="modal-overlay" id="letter-modal">
         <div class="modal-card">
@@ -163,6 +200,6 @@
     <button id="install-btn">✦ Install App</button>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=13" defer></script>
+    <script src="app.js?v=14" defer></script>
 </body>
 </html>

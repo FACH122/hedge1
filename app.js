@@ -17,6 +17,7 @@
     let solvedIds = JSON.parse(localStorage.getItem('solvedIds') || '[]');
     if (!Array.isArray(solvedIds)) solvedIds = [];
     let texts = {};
+    let interactions = {};
     let poemData = null;
     let activeBox = null;
 
@@ -372,6 +373,177 @@
         initReasonFoil();
     });
 
+    // ================= INTERACTIVE WIDGETS =================
+    const FALLBACK_ENV_LETTER = 'إلى {name}...\n\nختمتُ هذه الرسالة قبل أن تصل إليكِ...\nافتحيها وحدي، وابتسمي وحدك. ✦';
+    const FALLBACK_FORTUNES = ['حظّك اليوم: وجهٌ ينتظر ابتسامتك.', 'حظّك اليوم: من فكّرك أولاً هذا الصباح؟', 'حظّك اليوم: قلبٌ يدقّ باسمك بصمت.'];
+    const FALLBACK_BALLOON_MSGS = ['أنتِ أجمل ما حدث لي.', 'تفكيري فيكِ يسعفني.', 'صوتكِ وطنٌ آمن.', 'قلبي يسكن عندكِ.', 'كل يومٌ معكِ احتفال.'];
+
+    function intEnvelopeLetter() { return (interactions.envelopeLetter || FALLBACK_ENV_LETTER).split('{name}').join(getHerName()); }
+    function intFortunes() { return (Array.isArray(interactions.fortunes) && interactions.fortunes.length) ? interactions.fortunes : FALLBACK_FORTUNES; }
+    function intBalloonMessages() { return (Array.isArray(interactions.balloonMessages) && interactions.balloonMessages.length) ? interactions.balloonMessages : FALLBACK_BALLOON_MSGS; }
+
+    function revealMessage(title, text) {
+        $id('reveal-title').textContent = title;
+        $id('reveal-text').innerText = text;
+        $id('reveal-modal').classList.add('open');
+    }
+
+    function applyInteractions() {
+        const vis = interactions.visibility || {};
+        document.getElementById('envelope-card').style.display = vis.envelope === false ? 'none' : '';
+        document.getElementById('cookie-card').style.display = vis.cookie === false ? 'none' : '';
+        document.getElementById('balloons-card').style.display = vis.balloons === false ? 'none' : '';
+        document.getElementById('env-letter-text').innerText = intEnvelopeLetter();
+        if (!envOpen) initEnvSeal();
+        initBalloons();
+    }
+
+    const envSeal = document.getElementById('env-seal');
+    const esx = envSeal.getContext('2d');
+    let envOpen = false, envDown = false;
+    function initEnvSeal() {
+        if (envOpen) return;
+        envSeal.width = envSeal.offsetWidth || 320;
+        envSeal.height = envSeal.offsetHeight || 210;
+        const g = esx.createLinearGradient(0, 0, envSeal.width, envSeal.height);
+        g.addColorStop(0, '#fce7f1'); g.addColorStop(1, '#f6c9db');
+        esx.fillStyle = g; esx.fillRect(0, 0, envSeal.width, envSeal.height);
+        const cx = envSeal.width / 2, cy = envSeal.height / 2 - 8;
+        esx.fillStyle = '#c2255c';
+        esx.beginPath(); esx.arc(cx, cy, 36, 0, 6.283); esx.fill();
+        esx.fillStyle = '#e64980';
+        esx.beginPath(); esx.arc(cx, cy, 29, 0, 6.283); esx.fill();
+        esx.fillStyle = '#fff'; esx.font = '26px serif';
+        esx.textAlign = 'center'; esx.textBaseline = 'middle';
+        esx.fillText('✦', cx, cy);
+        esx.fillStyle = 'rgba(125,84,104,0.95)'; esx.font = '13px Montserrat, sans-serif';
+        esx.fillText('افركي الختم بلمسة', cx, cy + 62);
+    }
+    function openEnvelope() {
+        envOpen = true;
+        document.getElementById('envelope').classList.add('open');
+        envSeal.style.transition = 'opacity 0.6s ease';
+        envSeal.style.opacity = '0';
+        setTimeout(() => { envSeal.style.display = 'none'; }, 650);
+        playChime();
+        burst(innerWidth / 2, innerHeight / 2, 50);
+    }
+    envSeal.addEventListener('pointerdown', e => { if (envOpen) return; envDown = true; envSeal.setPointerCapture(e.pointerId); envScratch(e); });
+    envSeal.addEventListener('pointerup', () => envDown = false);
+    envSeal.addEventListener('pointerleave', () => envDown = false);
+    envSeal.addEventListener('pointermove', envScratch);
+    function envScratch(e) {
+        if (!envDown || envOpen) return;
+        const rect = envSeal.getBoundingClientRect();
+        esx.globalCompositeOperation = 'destination-out';
+        esx.beginPath();
+        esx.arc(e.clientX - rect.left, e.clientY - rect.top, 22, 0, 6.283);
+        esx.fill();
+        const d = esx.getImageData(0, 0, envSeal.width, envSeal.height).data;
+        let clear = 0;
+        for (let i = 3; i < d.length; i += 40) if (d[i] === 0) clear++;
+        if (clear / (d.length / 40) > 0.45) openEnvelope();
+    }
+    addEventListener('resize', () => { if (!envOpen) initEnvSeal(); });
+
+    let cookieCracked = false;
+    let fortuneIdx = new Date().getDate() % 997;
+    function crackCookie() {
+        if (cookieCracked) return;
+        cookieCracked = true;
+        const c = document.getElementById('cookie');
+        c.classList.add('cracked');
+        playChime();
+        const r = c.getBoundingClientRect();
+        burst(r.left + r.width / 2, r.top + r.height / 2, 25);
+        setTimeout(() => {
+            document.getElementById('fortune-text').innerText = intFortunes()[fortuneIdx % intFortunes().length];
+            document.querySelector('.fortune-paper').classList.add('show');
+        }, 380);
+    }
+    document.getElementById('cookie').addEventListener('click', crackCookie);
+    $id('cookie-again').addEventListener('click', () => {
+        const list = intFortunes();
+        if (list.length < 2) { showToast('أضيفي المزيد من الحكم من لوحة التحكم ✦'); return; }
+        let ni;
+        do { ni = Math.floor(Math.random() * list.length); } while (ni % list.length === fortuneIdx % list.length);
+        fortuneIdx = ni;
+        cookieCracked = false;
+        document.getElementById('cookie').classList.remove('cracked');
+        document.querySelector('.fortune-paper').classList.remove('show');
+        setTimeout(crackCookie, 350);
+    });
+
+    const bCanvas = document.getElementById('balloon-canvas');
+    const bcx = bCanvas.getContext('2d');
+    const BALLOON_COLORS = ['#f783ac', '#e64980', '#ffa8c5', '#c2255c', '#ff8fab', '#d6336c', '#f9c0d5'];
+    let balloons = [], bw = 0, bh = 260;
+    function initBalloons() {
+        bw = bCanvas.width = bCanvas.offsetWidth || 300;
+        bh = bCanvas.height = 260;
+        const msgs = intBalloonMessages();
+        const n = Math.min(Math.max(msgs.length, 5), 10);
+        balloons = [];
+        for (let i = 0; i < n; i++) {
+            balloons.push({
+                x: (bw / n) * (i + 0.3) + Math.random() * 30,
+                y: bh * 0.4 + Math.random() * bh,
+                r: 20 + Math.random() * 9,
+                c: BALLOON_COLORS[i % BALLOON_COLORS.length],
+                vy: 0.3 + Math.random() * 0.35,
+                sway: Math.random() * 6.283,
+                popped: false,
+                msg: msgs[i % msgs.length],
+                _x: 0
+            });
+        }
+    }
+    function drawBalloon(x, y, r, c) {
+        bcx.strokeStyle = 'rgba(125,84,104,0.35)';
+        bcx.beginPath();
+        bcx.moveTo(x, y + r + 8);
+        bcx.quadraticCurveTo(x + 7, y + r + 34, x, y + r + 60);
+        bcx.stroke();
+        bcx.fillStyle = c;
+        bcx.beginPath(); bcx.ellipse(x, y, r * 0.82, r, 0, 0, 6.283); bcx.fill();
+        bcx.beginPath(); bcx.moveTo(x, y + r - 2); bcx.lineTo(x - 4, y + r + 8); bcx.lineTo(x + 4, y + r + 8); bcx.closePath(); bcx.fill();
+        bcx.fillStyle = 'rgba(255,255,255,0.4)';
+        bcx.beginPath(); bcx.ellipse(x - r * 0.3, y - r * 0.35, r * 0.16, r * 0.28, 0.5, 0, 6.283); bcx.fill();
+    }
+    function balloonLoop() {
+        if (document.getElementById('balloons-card').style.display !== 'none') {
+            bcx.clearRect(0, 0, bw, bh);
+            for (const b of balloons) {
+                if (b.popped) continue;
+                b.y -= b.vy;
+                b.sway += 0.02;
+                if (b.y < -70) b.y = bh + 70;
+                b._x = b.x + Math.sin(b.sway) * 10;
+                drawBalloon(b._x, b.y, b.r, b.c);
+            }
+        }
+        requestAnimationFrame(balloonLoop);
+    }
+    bCanvas.addEventListener('pointerdown', e => {
+        const rect = bCanvas.getBoundingClientRect();
+        const px = e.clientX - rect.left, py = e.clientY - rect.top;
+        for (const b of balloons) {
+            if (b.popped) continue;
+            const dx = (px - b._x) / (b.r * 0.82), dy = (py - b.y) / b.r;
+            if (dx * dx + dy * dy <= 1.2) {
+                b.popped = true;
+                burst(rect.left + b._x, rect.top + b.y, 35);
+                playChime();
+                revealMessage('🎈 مفاجأة!', b.msg);
+                break;
+            }
+        }
+    });
+    $id('balloon-reset').addEventListener('click', initBalloons);
+    addEventListener('resize', initBalloons);
+    balloonLoop();
+    applyInteractions();
+
     // ================= PUZZLE BOXES =================
     function todayStr() {
         const d = new Date();
@@ -695,6 +867,8 @@
                     texts = row.value;
                 } else if (row.key === 'poem' && Array.isArray(row.value) && row.value.length) {
                     poemData = row.value;
+                } else if (row.key === 'interactions' && row.value) {
+                    interactions = row.value;
                 }
             });
             loadFailedShown = false;
@@ -709,6 +883,7 @@
         applyName();
         await pullProgress();
         renderBoxes();
+        applyInteractions();
     }
 
     // ================= PROGRESS BACKUP =================
