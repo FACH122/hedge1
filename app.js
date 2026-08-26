@@ -89,14 +89,29 @@
             o.start(now); o.stop(now + 3.4);
         } catch (e) {}
     }
+    let songAudio = null;
     $id('music-btn').addEventListener('click', () => {
         try {
-            if (!musicCtx) musicCtx = new (window.AudioContext || window.webkitAudioContext)();
             musicOn = !musicOn;
             $id('music-btn').classList.toggle('playing', musicOn);
             $id('music-btn').textContent = musicOn ? '♫' : '♪';
-            if (musicOn) { ambientNote(); musicTimer = setInterval(ambientNote, 1600); showToast('♪ موسيقى هادئة لكِ وحدك'); }
-            else clearInterval(musicTimer);
+            if (interactions.songUrl) {
+                if (!songAudio) {
+                    songAudio = new Audio(interactions.songUrl);
+                    songAudio.loop = true;
+                    songAudio.volume = 0.55;
+                }
+                if (musicOn) {
+                    songAudio.play().catch(() => {});
+                    showToast('♪ أغنيتكِ المفضلة');
+                } else {
+                    songAudio.pause();
+                }
+            } else {
+                if (!musicCtx) musicCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (musicOn) { ambientNote(); musicTimer = setInterval(ambientNote, 1600); showToast('♪ موسيقى هادئة لكِ وحدك'); }
+                else clearInterval(musicTimer);
+            }
         } catch (e) {}
     });
 

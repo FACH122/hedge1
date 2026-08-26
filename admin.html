@@ -162,6 +162,13 @@
             <label class="lbl">🎂 رسالة الشموع (بعد إطفائها كلها)</label>
             <textarea class="big-ta" id="ta-candles"></textarea>
 
+            <label class="lbl">🎵 أغنيتها المفضلة (تشغل من زر ♪ في الموقع — حد ١٢ ميغا)</label>
+            <div id="song-preview" style="margin-top:4px"></div>
+            <div class="actions" style="margin-top:8px">
+                <button class="tbtn" onclick="pickSong(this)">📁 اختيار أغنية</button>
+                <button class="tbtn" onclick="clearSong()">✕ إزالة</button>
+            </div>
+
             <label class="lbl" style="margin-top:14px">👁️ إظهار الأقسام في الموقع</label>
             <div class="toolbar" style="justify-content:flex-start;gap:14px">
                 <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="ck-balloons"> 🎈 البالونات</label>
@@ -323,6 +330,7 @@ async function loadAll() {
         $id('ta-candles').value = INT_RAW.candlesMessage || '';
         renderSlidePreview();
         renderMemoryPreview();
+        renderSongPreview();
     } catch (e) {
         document.getElementById('plist').innerHTML =
             `<div class="empty">⚠️ خطأ اتصال: ${esc(e.message)}</div>`;
@@ -594,6 +602,48 @@ function pickMemoryImage(btn) {
 function clearMemoryImages() {
     INT_RAW.memoryImages = [];
     renderMemoryPreview();
+}
+
+function renderSongPreview() {
+    const el = document.getElementById('song-preview');
+    el.innerHTML = INT_RAW.songUrl
+        ? `<audio controls src="${esc(INT_RAW.songUrl)}" style="width:100%;max-width:320px"></audio>`
+        : '<span style="color:#7d5468;font-size:0.85rem">لا أغنية بعد — زر ♪ يشغّل الموسيقى الهادئة العادية</span>';
+}
+
+function pickSong(btn) {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'audio/*';
+    inp.onchange = async () => {
+        const file = inp.files[0];
+        if (!file) return;
+        const st = document.getElementById('inter-status');
+        if (!file.type.startsWith('audio/')) { st.textContent = '✕ اختر ملف صوت'; st.className = 'status err'; return; }
+        if (file.size > 12 * 1024 * 1024) { st.textContent = '✕ الأغنية كبيرة — الحد ١٢ ميغا'; st.className = 'status err'; return; }
+        btn.disabled = true;
+        st.textContent = '...جاري رفع الأغنية'; st.className = 'status ok';
+        try {
+            const ext = (file.name.split('.').pop() || 'mp3').toLowerCase();
+            const fname = `song-${Date.now()}.${ext}`;
+            const r = await fetch(`${SB_URL}/storage/v1/object/rewards/${fname}`, {
+                method: 'POST',
+                headers: await authHeaders(false),
+                body: file
+            });
+            if (!r.ok) throw new Error((await r.json().catch(() => ({}))).message || r.status);
+            INT_RAW.songUrl = `${SB_URL}/storage/v1/object/public/rewards/${fname}`;
+            renderSongPreview();
+            st.textContent = '✔ رُفعت — اضغطي 💾 حفظ التفاعلات';
+        } catch (e) {
+            st.textContent = '✕ ' + e.message; st.className = 'status err';
+        } finally { btn.disabled = false; }
+    };
+    inp.click();
+}
+
+function clearSong() {
+    INT_RAW.songUrl = '';
+    renderSongPreview();
 }
 
 async function saveInteractions() {
