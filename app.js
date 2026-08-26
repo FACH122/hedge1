@@ -191,6 +191,15 @@
         if (hl && texts.hiddenLetter) hl.innerText = texts.hiddenLetter.split('{name}').join(n);
     }
 
+    const stanzaRevealer = new IntersectionObserver(entries => {
+        entries.forEach(en => {
+            if (en.isIntersecting) {
+                en.target.classList.add('revealed');
+                stanzaRevealer.unobserve(en.target);
+            }
+        });
+    }, { threshold: 0.12 });
+
     function buildPoem() {
         const stanzas = (poemData && poemData.length) ? poemData : DEFAULT_POEM;
         const list = document.getElementById('stanza-list');
@@ -203,6 +212,7 @@
         }).join('');
         const last = list.lastElementChild;
         if (last) last.insertAdjacentHTML('beforeend', '<br><span class="name-reveal her-name"></span>');
+        list.querySelectorAll('.stanza').forEach(s => stanzaRevealer.observe(s));
         applyName();
     }
     buildPoem();
