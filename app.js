@@ -374,12 +374,8 @@
     });
 
     // ================= INTERACTIVE WIDGETS =================
-    const FALLBACK_ENV_LETTER = 'إلى {name}...\n\nختمتُ هذه الرسالة قبل أن تصل إليكِ...\nافتحيها وحدي، وابتسمي وحدك. ✦';
-    const FALLBACK_FORTUNES = ['حظّك اليوم: وجهٌ ينتظر ابتسامتك.', 'حظّك اليوم: من فكّرك أولاً هذا الصباح؟', 'حظّك اليوم: قلبٌ يدقّ باسمك بصمت.'];
     const FALLBACK_BALLOON_MSGS = ['أنتِ أجمل ما حدث لي.', 'تفكيري فيكِ يسعفني.', 'صوتكِ وطنٌ آمن.', 'قلبي يسكن عندكِ.', 'كل يومٌ معكِ احتفال.'];
 
-    function intEnvelopeLetter() { return (interactions.envelopeLetter || FALLBACK_ENV_LETTER).split('{name}').join(getHerName()); }
-    function intFortunes() { return (Array.isArray(interactions.fortunes) && interactions.fortunes.length) ? interactions.fortunes : FALLBACK_FORTUNES; }
     function intBalloonMessages() { return (Array.isArray(interactions.balloonMessages) && interactions.balloonMessages.length) ? interactions.balloonMessages : FALLBACK_BALLOON_MSGS; }
 
     function revealMessage(title, text) {
@@ -390,89 +386,9 @@
 
     function applyInteractions() {
         const vis = interactions.visibility || {};
-        document.getElementById('envelope-card').style.display = vis.envelope === false ? 'none' : '';
-        document.getElementById('cookie-card').style.display = vis.cookie === false ? 'none' : '';
         document.getElementById('balloons-card').style.display = vis.balloons === false ? 'none' : '';
-        document.getElementById('env-letter-text').innerText = intEnvelopeLetter();
-        if (!envOpen) initEnvSeal();
         initBalloons();
     }
-
-    const envSeal = document.getElementById('env-seal');
-    const esx = envSeal.getContext('2d');
-    let envOpen = false, envDown = false;
-    function initEnvSeal() {
-        if (envOpen) return;
-        envSeal.width = envSeal.offsetWidth || 320;
-        envSeal.height = envSeal.offsetHeight || 210;
-        const g = esx.createLinearGradient(0, 0, envSeal.width, envSeal.height);
-        g.addColorStop(0, '#fce7f1'); g.addColorStop(1, '#f6c9db');
-        esx.fillStyle = g; esx.fillRect(0, 0, envSeal.width, envSeal.height);
-        const cx = envSeal.width / 2, cy = envSeal.height / 2 - 8;
-        esx.fillStyle = '#c2255c';
-        esx.beginPath(); esx.arc(cx, cy, 36, 0, 6.283); esx.fill();
-        esx.fillStyle = '#e64980';
-        esx.beginPath(); esx.arc(cx, cy, 29, 0, 6.283); esx.fill();
-        esx.fillStyle = '#fff'; esx.font = '26px serif';
-        esx.textAlign = 'center'; esx.textBaseline = 'middle';
-        esx.fillText('✦', cx, cy);
-        esx.fillStyle = 'rgba(125,84,104,0.95)'; esx.font = '13px Montserrat, sans-serif';
-        esx.fillText('افركي الختم بلمسة', cx, cy + 62);
-    }
-    function openEnvelope() {
-        envOpen = true;
-        document.getElementById('envelope').classList.add('open');
-        envSeal.style.transition = 'opacity 0.6s ease';
-        envSeal.style.opacity = '0';
-        setTimeout(() => { envSeal.style.display = 'none'; }, 650);
-        playChime();
-        burst(innerWidth / 2, innerHeight / 2, 50);
-    }
-    envSeal.addEventListener('pointerdown', e => { if (envOpen) return; envDown = true; envSeal.setPointerCapture(e.pointerId); envScratch(e); });
-    envSeal.addEventListener('pointerup', () => envDown = false);
-    envSeal.addEventListener('pointerleave', () => envDown = false);
-    envSeal.addEventListener('pointermove', envScratch);
-    function envScratch(e) {
-        if (!envDown || envOpen) return;
-        const rect = envSeal.getBoundingClientRect();
-        esx.globalCompositeOperation = 'destination-out';
-        esx.beginPath();
-        esx.arc(e.clientX - rect.left, e.clientY - rect.top, 22, 0, 6.283);
-        esx.fill();
-        const d = esx.getImageData(0, 0, envSeal.width, envSeal.height).data;
-        let clear = 0;
-        for (let i = 3; i < d.length; i += 40) if (d[i] === 0) clear++;
-        if (clear / (d.length / 40) > 0.35) openEnvelope();
-    }
-    addEventListener('resize', () => { if (!envOpen) initEnvSeal(); });
-
-    let cookieCracked = false;
-    let fortuneIdx = new Date().getDate() % 997;
-    function crackCookie() {
-        if (cookieCracked) return;
-        cookieCracked = true;
-        const c = document.getElementById('cookie');
-        c.classList.add('cracked');
-        playChime();
-        const r = c.getBoundingClientRect();
-        burst(r.left + r.width / 2, r.top + r.height / 2, 25);
-        setTimeout(() => {
-            document.getElementById('fortune-text').innerText = intFortunes()[fortuneIdx % intFortunes().length];
-            document.querySelector('.fortune-paper').classList.add('show');
-        }, 380);
-    }
-    document.getElementById('cookie').addEventListener('click', crackCookie);
-    $id('cookie-again').addEventListener('click', () => {
-        const list = intFortunes();
-        if (list.length < 2) { showToast('أضيفي المزيد من الحكم من لوحة التحكم ✦'); return; }
-        let ni;
-        do { ni = Math.floor(Math.random() * list.length); } while (ni % list.length === fortuneIdx % list.length);
-        fortuneIdx = ni;
-        cookieCracked = false;
-        document.getElementById('cookie').classList.remove('cracked');
-        document.querySelector('.fortune-paper').classList.remove('show');
-        setTimeout(crackCookie, 350);
-    });
 
     const bCanvas = document.getElementById('balloon-canvas');
     const bcx = bCanvas.getContext('2d');

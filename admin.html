@@ -126,12 +126,6 @@
         </div>
 
         <div id="tab-inter" style="display:none">
-            <label class="lbl">💌 رسالة المظروف المختوم — استخدمي {name} لاسمها</label>
-            <textarea class="big-ta" id="ta-envelope"></textarea>
-
-            <label class="lbl">🥠 حكم كوكيز الحظ (حظ في كل سطر)</label>
-            <textarea class="big-ta" id="ta-cookie"></textarea>
-
             <label class="lbl">🎈 رسائل البالونات (رسالة في كل سطر)</label>
             <textarea class="big-ta" id="ta-balloons"></textarea>
 
@@ -259,8 +253,6 @@ async function loadAll() {
                 : '';
         }
         INT_RAW = map.interactions || {};
-        $id('ta-envelope').value = INT_RAW.envelopeLetter || '';
-        $id('ta-cookie').value = (INT_RAW.fortunes || []).join('\n');
         $id('ta-balloons').value = (INT_RAW.balloonMessages || []).join('\n');
     } catch (e) {
         document.getElementById('plist').innerHTML =
@@ -448,8 +440,6 @@ async function saveInteractions() {
     try {
         await saveKey('interactions', {
             ...INT_RAW,
-            envelopeLetter: $id('ta-envelope').value.trim(),
-            fortunes: $id('ta-cookie').value.split('\n').map(s => s.trim()).filter(Boolean),
             balloonMessages: $id('ta-balloons').value.split('\n').map(s => s.trim()).filter(Boolean)
         });
         st.textContent = '✔ حُفظ — الموقع تحدث تلقائياً!';
