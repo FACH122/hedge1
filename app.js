@@ -375,8 +375,12 @@
 
     // ================= INTERACTIVE WIDGETS =================
     const FALLBACK_BALLOON_MSGS = ['أنتِ أجمل ما حدث لي.', 'تفكيري فيكِ يسعفني.', 'صوتكِ وطنٌ آمن.', 'قلبي يسكن عندكِ.', 'كل يومٌ معكِ احتفال.'];
+    const FALLBACK_HEART_MSG = 'أنتِ نبضُ قلبي كلِّه.';
+    const FALLBACK_GIFT_MSG = 'أجمل ما في حياتي... أنتِ.';
 
     function intBalloonMessages() { return (Array.isArray(interactions.balloonMessages) && interactions.balloonMessages.length) ? interactions.balloonMessages : FALLBACK_BALLOON_MSGS; }
+    function intHeartMessage() { return interactions.heartMessage || FALLBACK_HEART_MSG; }
+    function intGiftMessage() { return interactions.giftMessage || FALLBACK_GIFT_MSG; }
 
     function revealMessage(title, text) {
         $id('reveal-title').textContent = title;
@@ -384,11 +388,153 @@
         $id('reveal-modal').classList.add('open');
     }
 
+    function showFullscreenImage(src, ms) {
+        const fs = $id('reward-fullscreen');
+        (fs._timers || []).forEach(clearTimeout);
+        fs._timers = [];
+        $id('reward-fs-img').src = src;
+        fs.classList.add('active');
+        requestAnimationFrame(() => requestAnimationFrame(() => fs.classList.add('show')));
+        fs._timers.push(setTimeout(() => {
+            fs.classList.remove('show');
+            fs._timers.push(setTimeout(() => fs.classList.remove('active'), 700));
+        }, ms || 4000));
+    }
+
     function applyInteractions() {
         const vis = interactions.visibility || {};
         document.getElementById('balloons-card').style.display = vis.balloons === false ? 'none' : '';
+        document.getElementById('heart-card').style.display = vis.heart === false ? 'none' : '';
+        document.getElementById('gift-card').style.display = vis.gift === false ? 'none' : '';
+        const slideOk = vis.slide !== false && !!interactions.slideImage;
+        document.getElementById('slide-card').style.display = slideOk ? '' : 'none';
         initBalloons();
+        if (slideOk) initSlide();
     }
+
+    // HEART
+    let heartFill = 0, heartHolding = false, heartDone = false;
+    const heartFillEl = document.getElementById('heart-fill');
+    function heartLoop() {
+        if (!heartDone) {
+            heartFill = heartHolding ? Math.min(100, heartFill + 0.8) : Math.max(0, heartFill - 1.2);
+            heartFillEl.style.clipPath = `inset(0 ${100 - heartFill}% 0 0)`;
+            if (heartFill >= 100) {
+                heartDone = true;
+                const r = document.getElementById('heart-wrap').getBoundingClientRect();
+                burst(r.left + r.width / 2, r.top + r.height / 2, 70);
+                playChime();
+                if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
+                revealMessage('❤️', intHeartMessage());
+                setTimeout(() => {
+                    heartFill = 0;
+                    heartDone = false;
+                    heartFillEl.style.clipPath = 'inset(0 100% 0 0)';
+                }, 800);
+            }
+        }
+        requestAnimationFrame(heartLoop);
+    }
+    const heartWrap = document.getElementById('heart-wrap');
+    heartWrap.addEventListener('pointerdown', e => { heartHolding = true; heartWrap.setPointerCapture(e.pointerId); });
+    heartWrap.addEventListener('pointerup', () => heartHolding = false);
+    heartWrap.addEventListener('pointercancel', () => heartHolding = false);
+    heartLoop();
+
+    // GIFT
+    let giftOpened = false, giftTaps = [], shakeEnergy = 0;
+    function openGift() {
+        if (giftOpened) return;
+        giftOpened = true;
+        const g = document.getElementById('gift');
+        g.classList.add('opened');
+        playChime();
+        const r = g.getBoundingClientRect();
+        burst(r.left + r.width / 2, r.top + r.height / 2, 80);
+        if (navigator.vibrate) navigator.vibrate([80, 50, 80]);
+        revealMessage('🎁', intGiftMessage());
+    }
+    document.getElementById('gift').addEventListener('pointerdown', () => {
+        const now = Date.now();
+        giftTaps = giftTaps.filter(t => now - t < 2000);
+        giftTaps.push(now);
+        if (giftTaps.length >= 5) openGift();
+        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+            DeviceMotionEvent.requestPermission().then(res => { if (res === 'granted') startMotion(); }).catch(() => {});
+        }
+    });
+    function startMotion() {
+        addEventListener('devicemotion', e => {
+            if (giftOpened) return;
+            const a = e.accelerationIncludingGravity;
+            if (!a) return;
+            const mag = Math.abs(a.x || 0) + Math.abs(a.y || 0) + Math.abs(a.z || 0);
+            if (mag > 25) {
+                shakeEnergy += mag;
+                const g = document.getElementById('gift');
+                g.classList.add('shaking');
+                clearTimeout(openGift._t);
+                openGift._t = setTimeout(() => g.classList.remove('shaking'), 400);
+                if (shakeEnergy > 90) openGift();
+            }
+        });
+    }
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission !== 'function') startMotion();
+
+    // SLIDE PUZZLE
+    let slideTiles = [], slideEmpty = 8, slideDone = false;
+    function slideNeighbors(pos) {
+        const r = Math.floor(pos / 3), c = pos % 3, out = [];
+        if (r > 0) out.push(pos - 3);
+        if (r < 2) out.push(pos + 3);
+        if (c > 0) out.push(pos - 1);
+        if (c < 2) out.push(pos + 1);
+        return out;
+    }
+    function slideSwap(pos) {
+        slideTiles[pos] = slideTiles.splice(slideEmpty, 1, slideTiles[pos])[0];
+        slideEmpty = pos;
+    }
+    function renderSlide() {
+        document.getElementById('slide-board').innerHTML = slideTiles.map((t, pos) => {
+            if (t === 8) return `<div class="slide-tile" data-pos="${pos}" style="visibility:hidden"></div>`;
+            const row = Math.floor(t / 3), col = t % 3;
+            return `<div class="slide-tile" data-pos="${pos}" style="background-image:url('${interactions.slideImage}');background-position:${col * 50}% ${row * 50}%"></div>`;
+        }).join('');
+    }
+    function initSlide() {
+        if (!interactions.slideImage) return;
+        slideTiles = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+        slideEmpty = 8;
+        slideDone = false;
+        let last = -1;
+        for (let k = 0; k < 120; k++) {
+            const opts = slideNeighbors(slideEmpty).filter(n => n !== last);
+            const pick = opts[Math.floor(Math.random() * opts.length)];
+            last = slideEmpty;
+            slideSwap(pick);
+        }
+        renderSlide();
+        document.getElementById('slide-hint').textContent = 'حركّي المربعات حتى تكتمل الصورة';
+    }
+    document.getElementById('slide-board').addEventListener('pointerdown', e => {
+        if (slideDone) return;
+        const tile = e.target.closest('.slide-tile');
+        if (!tile) return;
+        const pos = +tile.dataset.pos;
+        if (!slideNeighbors(pos).includes(slideEmpty)) return;
+        slideSwap(pos);
+        renderSlide();
+        if (slideTiles.every((t, i) => t === i)) {
+            slideDone = true;
+            playChime();
+            burst(innerWidth / 2, innerHeight / 2, 90);
+            if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
+            showFullscreenImage(interactions.slideImage, 5000);
+            document.getElementById('slide-hint').textContent = 'أحسنتِ! أكملتِ البازل ✦';
+        }
+    });
+    $id('slide-reset').addEventListener('click', initSlide);
 
     const bCanvas = document.getElementById('balloon-canvas');
     const bcx = bCanvas.getContext('2d');

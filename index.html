@@ -18,7 +18,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="styles.css?v=16">
+    <link rel="stylesheet" href="styles.css?v=17">
 </head>
 <body>
 
@@ -66,6 +66,28 @@
             <div style="text-align:center;margin-top:6px">
                 <button class="btn btn-ghost" id="balloon-reset">✦ أعيدي البالونات ✦</button>
             </div>
+        </div>
+
+        <div class="card" id="heart-card" style="text-align:center">
+            <span class="label">✦ القلب ✦</span>
+            <div class="heart-wrap" id="heart-wrap">
+                <span class="heart-bg">🤍</span>
+                <span class="heart-fill" id="heart-fill">❤️</span>
+            </div>
+            <p class="hint-line">اضغطي على القلب باستمرار حتى يمتلئ</p>
+        </div>
+
+        <div class="card" id="gift-card" style="text-align:center">
+            <span class="label">✦ هدية بانتظاركِ ✦</span>
+            <div class="gift" id="gift">🎁</div>
+            <p class="hint-line">رهّجي هاتفكِ لفتحها — أو اضغطي عليها ٥ ضغطات سريعة</p>
+        </div>
+
+        <div class="card" id="slide-card" style="text-align:center">
+            <span class="label">✦ بازل الصورة ✦</span>
+            <div class="slide-board" id="slide-board"></div>
+            <p class="hint-line" id="slide-hint" style="margin-top:12px">حركّي المربعات حتى تكتمل الصورة</p>
+            <button class="btn btn-ghost" id="slide-reset">✦ خلط من جديد ✦</button>
         </div>
 
         <div class="card" style="padding-bottom:22px">
@@ -181,6 +203,6 @@
     <button id="install-btn">✦ Install App</button>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=16" defer></script>
+    <script src="app.js?v=17" defer></script>
 </body>
 </html>
