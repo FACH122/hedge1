@@ -232,6 +232,12 @@ async function loadAll() {
         T = map.texts || {};
         renderPuzzleList();
         fillTexts();
+        const poemEl = $id('ta-poem');
+        if (poemEl) {
+            poemEl.value = Array.isArray(map.poem)
+                ? map.poem.map(block => block.join('\n')).join('\n\n')
+                : '';
+        }
     } catch (e) {
         document.getElementById('plist').innerHTML =
             `<div class="empty">⚠️ خطأ اتصال: ${esc(e.message)}</div>`;
