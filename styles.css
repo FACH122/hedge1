@@ -174,6 +174,23 @@
         #reward-text { font-size: 1.35rem; line-height: 2.1; color: var(--accent); white-space: pre-line; }
         .next-hint { margin-top: 16px; color: var(--text-sub); font-size: 0.95rem; }
 
+        #reward-fullscreen {
+            position: fixed; inset: 0; z-index: 1500;
+            background: rgba(255,240,248,0.94);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            display: none; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.6s ease; pointer-events: none;
+        }
+        #reward-fullscreen.active { display: flex; }
+        #reward-fullscreen.show { opacity: 1; }
+        #reward-fullscreen img {
+            max-width: 94vw; max-height: 86vh; border-radius: 18px;
+            border: 1px solid var(--border);
+            box-shadow: 0 30px 90px rgba(214,51,108,0.4);
+            pointer-events: none; -webkit-user-select: none; user-select: none;
+            -webkit-user-drag: none; -webkit-touch-callout: none;
+        }
+
         .empty-note { color: var(--text-sub); font-size: 1.05rem; line-height: 2; padding: 10px 0; }
 
         /* RECORDER */

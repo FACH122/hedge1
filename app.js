@@ -478,6 +478,20 @@
                 setTimeout(() => { img.style.display = 'none'; }, 1000);
             }, 5000);
         } else img.style.display = 'none';
+        const fs = $id('reward-fullscreen');
+        if (fs._t1) { clearTimeout(fs._t1); clearTimeout(fs._t2); }
+        if (p.reward_image) {
+            const fsImg = $id('reward-fs-img');
+            fsImg.src = p.reward_image;
+            fs.classList.add('active');
+            requestAnimationFrame(() => requestAnimationFrame(() => fs.classList.add('show')));
+            fs._t1 = setTimeout(() => {
+                fs.classList.remove('show');
+                fs._t2 = setTimeout(() => fs.classList.remove('active'), 700);
+            }, 5000);
+        } else {
+            fs.classList.remove('active', 'show');
+        }
         const next = puzzles.find(x => !solvedIds.includes(x.qid));
         document.getElementById('next-hint').innerText = next
             ? 'الصندوق التالي ينتظركِ ✦'
