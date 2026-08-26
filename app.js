@@ -479,16 +479,29 @@
             }, 5000);
         } else img.style.display = 'none';
         const fs = $id('reward-fullscreen');
-        if (fs._t1) { clearTimeout(fs._t1); clearTimeout(fs._t2); }
-        if (p.reward_image) {
+        (fs._timers || []).forEach(clearTimeout);
+        fs._timers = [];
+        const fsImgs = (p.reward_images && p.reward_images.length)
+            ? p.reward_images
+            : (p.reward_image ? [p.reward_image] : []);
+        if (fsImgs.length) {
             const fsImg = $id('reward-fs-img');
-            fsImg.src = p.reward_image;
-            fs.classList.add('active');
-            requestAnimationFrame(() => requestAnimationFrame(() => fs.classList.add('show')));
-            fs._t1 = setTimeout(() => {
-                fs.classList.remove('show');
-                fs._t2 = setTimeout(() => fs.classList.remove('active'), 700);
-            }, 5000);
+            let i = 0;
+            const showNext = () => {
+                if (i >= fsImgs.length) {
+                    fs.classList.remove('show');
+                    fs._timers.push(setTimeout(() => fs.classList.remove('active'), 700));
+                    return;
+                }
+                fsImg.src = fsImgs[i++];
+                fs.classList.add('active');
+                requestAnimationFrame(() => requestAnimationFrame(() => fs.classList.add('show')));
+                fs._timers.push(setTimeout(() => {
+                    fs.classList.remove('show');
+                    fs._timers.push(setTimeout(showNext, 700));
+                }, 5000));
+            };
+            showNext();
         } else {
             fs.classList.remove('active', 'show');
         }
@@ -663,6 +676,7 @@
                             a: Array.isArray(p.a) ? p.a : String(p.a || '').split('|').map(s => s.trim()).filter(Boolean),
                             reward: p.reward || '',
                             reward_image: p.reward_image || '',
+                            reward_images: Array.isArray(p.reward_images) ? p.reward_images.filter(u => u) : [],
                             unlock: p.unlock || ''
                         }));
                     if (puzzles.length) {

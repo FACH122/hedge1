@@ -209,6 +209,7 @@ async function saveKey(key, value) {
 
 // ================= PUZZLES =================
 let P = [];
+let POEM = [];
 
 let DB_OK = true;
 
@@ -230,6 +231,7 @@ async function loadAll() {
         const map = Object.fromEntries(rows.map(x => [x.key, x.value]));
         P = Array.isArray(map.puzzles) ? map.puzzles : [];
         T = map.texts || {};
+        POEM = Array.isArray(map.poem) ? map.poem : [];
         renderPuzzleList();
         fillTexts();
         const poemEl = $id('ta-poem');
@@ -275,30 +277,70 @@ function renderPuzzleList() {
             <input type="text" class="f-a" value="${esc((p.a||[]).join(' | '))}">
             <label>🎁 المكافأة النصية (تظهر عند حلّها)</label>
             <textarea class="f-rw">${esc(p.reward)}</textarea>
-            <label>🖼️ صورة المكافأة (تظهر ٥ ثوانٍ)</label>
-            <div class="actions" style="margin-top:4px">
-                <button class="tbtn" onclick="pickImage(this)">📁 ${p.reward_image ? 'تغيير الصورة' : 'اختيار صورة'}</button>
-                ${p.reward_image ? '<button class="tbtn" onclick="clearImage(this)">✕ بدون صورة</button>' : ''}
+            <label>🖼️ صور المكافأة (حتى ٥ — تظهر ملء الشاشة عند الحلّ)</label>
+            <div class="imgs-row" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;min-height:10px"></div>
+            <div class="actions" style="margin-top:8px">
+                <button class="tbtn" onclick="pickImage(this)">📁 إضافة صورة</button>
             </div>
-            <img class="rimg" src="${esc(p.reward_image)}" style="display:${p.reward_image?'block':'none'}" onerror="this.style.display='none'">
-            <input type="hidden" class="f-img" value="${esc(p.reward_image)}">
+            <input type="hidden" class="f-imgs" value="${esc(JSON.stringify(imgsOf(p)))}">
             <div class="actions">
                 <button class="save" onclick="savePuzzle(this)">💾 حفظ</button>
                 <button class="del" onclick="deletePuzzle(this)">🗑️ حذف نهائي</button>
             </div>
             <div class="status"></div>
         </div>`).join('');
-}
+        document.querySelectorAll('#plist .card').forEach(renderImgs);
+    }
 
 function cardData(card) {
+    let imgs = [];
+    try { imgs = JSON.parse(card.querySelector('.f-imgs').value || '[]'); } catch (_) {}
+    if (!Array.isArray(imgs)) imgs = [];
     return {
         qid: P[+card.dataset.i].qid,
         q: card.querySelector('.f-q').value.trim(),
         a: card.querySelector('.f-a').value.split('|').map(s=>s.trim()).filter(Boolean),
         reward: card.querySelector('.f-rw').value.trim(),
-        reward_image: card.querySelector('.f-img').value.trim(),
+        reward_images: imgs,
+        reward_image: imgs[0] || '',
         unlock: (card.querySelector('.f-unlock') || {}).value || ''
     };
+}
+
+function imgsOf(p) {
+    if (Array.isArray(p.reward_images) && p.reward_images.length) return p.reward_images;
+    return p.reward_image ? [p.reward_image] : [];
+}
+
+function renderImgs(card) {
+    const row = card.querySelector('.imgs-row');
+    let imgs = [];
+    try { imgs = JSON.parse(card.querySelector('.f-imgs').value || '[]'); } catch (_) {}
+    row.innerHTML = imgs.map(u => `
+        <div class="img-thumb" style="position:relative">
+            <img src="${esc(u)}" style="width:90px;height:70px;object-fit:cover;border-radius:8px;border:1px solid #f3d3e1;display:block">
+            <button type="button" class="img-del" onclick="delImage(this)" style="position:absolute;top:-7px;inset-inline-end:-7px;background:#e03131;color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:12px;line-height:1">✕</button>
+        </div>`).join('');
+}
+
+function addImageUrl(card, url) {
+    const inp = card.querySelector('.f-imgs');
+    let imgs = [];
+    try { imgs = JSON.parse(inp.value || '[]'); } catch (_) {}
+    imgs.push(url);
+    inp.value = JSON.stringify(imgs);
+    renderImgs(card);
+}
+
+function delImage(btn) {
+    const card = btn.closest('.card');
+    const inp = card.querySelector('.f-imgs');
+    const url = btn.parentNode.querySelector('img').src;
+    let imgs = [];
+    try { imgs = JSON.parse(inp.value || '[]'); } catch (_) {}
+    imgs = imgs.filter(u => u !== url);
+    inp.value = JSON.stringify(imgs);
+    renderImgs(card);
 }
 
 async function savePuzzle(btn) {
@@ -356,6 +398,7 @@ function fillTexts() {
     $id('ta-reasons').value = (T.reasons||[]).join('\n');
     $id('ta-letter').value = T.hiddenLetter || '';
     $id('ta-typed').value = T.typedLetter || '';
+    $id('ta-poem').value = POEM.map(stanza => stanza.join('\n')).join('\n\n');
 }
 
 async function saveTexts() {
@@ -392,6 +435,10 @@ async function savePoem() {
 
 // ================= IMAGES =================
 function pickImage(btn) {
+    const card = btn.closest('.card');
+    let imgs = [];
+    try { imgs = JSON.parse(card.querySelector('.f-imgs').value || '[]'); } catch (_) {}
+    if (imgs.length >= 5) return setStatus(card, '✕ الحد الأقصى ٥ صور لكل لغز', false);
     const inp = document.createElement('input');
     inp.type='file'; inp.accept='image/*';
     inp.onchange = () => inp.files[0] && uploadImg(inp.files[0], btn);
@@ -441,10 +488,8 @@ async function uploadImg(file, btn) {
             finish();
             if (xhr.status >= 200 && xhr.status < 300) {
                 const publicUrl = `${SB_URL}/storage/v1/object/public/rewards/${fname}`;
-                card.querySelector('.f-img').value = publicUrl;
-                const img = card.querySelector('.rimg');
-                img.src = publicUrl; img.style.display = 'block';
-                setStatus(card, '✔ رُفعت بنجاح — اضغط 💾 حفظ لتثبيتها', true);
+                addImageUrl(card, publicUrl);
+                setStatus(card, '✔ رُفعت — أضيفي المزيد أو اضغطي 💾 حفظ', true);
             } else {
                 let msg = 'HTTP ' + xhr.status;
                 try { msg = JSON.parse(xhr.responseText).message || msg; } catch (_) {}
@@ -467,13 +512,6 @@ async function uploadImg(file, btn) {
         st.className = 'status err';
         setStatus(card, '✕ فشل بدء الرفع: ' + e.message, false);
     }
-}
-
-function clearImage(btn) {
-    const card = btn.closest('.card');
-    card.querySelector('.f-img').value='';
-    card.querySelector('.rimg').style.display='none';
-    setStatus(card, 'ستُحذف بعد الضغط على حفظ', true);
 }
 
 // ================= VOICES & HER PHOTOS =================
