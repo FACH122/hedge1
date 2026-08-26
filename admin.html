@@ -77,6 +77,7 @@
             <button class="tab-btn" data-t="texts" onclick="showTab('texts')">💬 النصوص</button>
             <button class="tab-btn" data-t="poem" onclick="showTab('poem')">📜 القصيدة</button>
             <button class="tab-btn" data-t="inter" onclick="showTab('inter')">✨ التفاعلات</button>
+            <button class="tab-btn" data-t="stats" onclick="showTab('stats')">📊 الإحصائيات</button>
             <button class="tab-btn" data-t="voices" onclick="showTab('voices')">🎙️ رسائلها</button>
         </div>
 
@@ -179,6 +180,14 @@
             <p class="status" id="inter-status" style="text-align:center"></p>
         </div>
 
+        <div id="tab-stats" style="display:none">
+            <div class="toolbar">
+                <button class="save" onclick="loadStats()">↺ تحديث الإحصائيات</button>
+            </div>
+            <p class="hint" style="text-align:center">تُسجَّل نشاطاتها في الموقع تلقائياً — لا شيء يُرسل لأي جهة أخرى</p>
+            <div id="stats-body"><div class="empty">اضغطي «↺ تحديث الإحصائيات»</div></div>
+        </div>
+
         <div id="tab-voices" style="display:none">
             <div class="toolbar">
                 <span class="tbtn" id="vcount" style="cursor:default;border:none;background:none;color:#7d5468"></span>
@@ -238,10 +247,11 @@ async function enter() {
 if (sessionStorage.getItem('ok')==='1') enter();
 
 function showTab(t) {
-    ['puzzles','texts','poem','inter','voices'].forEach(x =>
+    ['puzzles','texts','poem','inter','stats','voices'].forEach(x =>
         document.getElementById('tab-'+x).style.display = x===t ? '' : 'none');
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.t===t));
     if (t==='voices') loadVoices();
+    if (t==='stats' && !loadStats._loaded) loadStats();
 }
 
 const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
@@ -709,6 +719,97 @@ async function uploadImg(file, btn) {
         st.className = 'status err';
         setStatus(card, '✕ فشل بدء الرفع: ' + e.message, false);
     }
+}
+
+// ================= STATS =================
+const SEC_NAMES = { hero:'🖼️ الواجهة (القصيدة)', daily:'💬 رسالة اليوم', reason:'💗 أسباب الحب', balloons:'🎈 البالونات',
+    heart:'❤️ القلب', gift:'🎁 الهدية', slide:'🖼️ البازل', memory:'🧩 الذاكرة', stars:'🌌 النجوم',
+    candles:'🎂 الشموع', boxes:'🧩 صناديق الألغاز', other:'أخرى' };
+
+async function loadStats() {
+    const body = document.getElementById('stats-body');
+    body.innerHTML = '<div class="loading">...جاري التحليل</div>';
+    try {
+        const r = await fetch(`${SB_URL}/rest/v1/analytics_events?select=client_id,name,section,detail&limit=5000`, { headers: await authHeaders() });
+        if (!r.ok) throw new Error((await r.json().catch(() => ({}))).message || r.status);
+        const rows = await r.json();
+        loadStats._loaded = true;
+        body.innerHTML = renderStats(rows);
+    } catch (e) {
+        body.innerHTML = `<div class="empty" style="color:#e03131">⚠️ ${esc(e.message)}<br><br>إذا ظهرت رسالة "relation does not exist" شغّلي أمر SQL المحدث (supabase-setup.sql) أولاً</div>`;
+    }
+}
+
+function renderStats(rows) {
+    const avg = a => a.length ? Math.round(a.reduce((x, y) => x + y, 0) / a.length) : 0;
+    const mins = ms => (ms / 60000).toFixed(1);
+    const n = v => (v || 0).toLocaleString('ar-DZ');
+
+    const visits = rows.filter(r => r.name === 'visit');
+    const perClient = {};
+    visits.forEach(v => perClient[v.client_id] = (perClient[v.client_id] || 0) + 1);
+    const nClients = Object.keys(perClient).length;
+    const returning = Object.values(perClient).filter(c => c > 1).length;
+    const totalTimeSec = rows.filter(r => r.name === 'time').reduce((a, r) => a + ((r.detail || {}).s || 0), 0);
+
+    const secTime = {}, secDisc = {}, secClicks = {}, secDbl = {}, secRapid = {}, secHes = {}, discMs = {}, hesMs = {};
+    rows.forEach(r => {
+        const d = r.detail || {};
+        if (r.name === 'section_time' && r.section) secTime[r.section] = (secTime[r.section] || 0) + (d.ms || 0);
+        if (r.name === 'discover' && r.section) { secDisc[r.section] = (secDisc[r.section] || 0) + 1; (discMs[r.section] = discMs[r.section] || []).push(d.ms || 0); }
+        if (r.name === 'click' && r.section) {
+            secClicks[r.section] = (secClicks[r.section] || 0) + 1;
+            if (d.dbl) secDbl[r.section] = (secDbl[r.section] || 0) + 1;
+            if (d.rapid) secRapid[r.section] = (secRapid[r.section] || 0) + 1;
+        }
+        if (r.name === 'hesitate' && r.section) { (secHes[r.section] = secHes[r.section] || []).push(d.ms || 0); }
+    });
+
+    const poemOpens = rows.filter(r => r.name === 'open_poem').length;
+    const scrolls = rows.filter(r => r.name === 'scroll').map(r => (r.detail || {}).pct || 0);
+    const maxScroll = scrolls.length ? Math.max(...scrolls) : 0;
+    const bottoms = rows.filter(r => r.name === 'bottom').length;
+    const allSecs = Object.keys(SEC_NAMES).filter(s => s !== 'other');
+    const ignored = allSecs.filter(s => !secDisc[s]);
+
+    let html = `
+    <div class="card">
+        <label style="margin-top:0">📊 ملخّص عام</label>
+        <p style="line-height:2.2;font-size:0.95rem;text-align:right">
+            🕐 إجمالي الوقت المستغرق: <b>${mins(totalTimeSec * 1000)} دقيقة</b><br>
+            👀 عدد الزيارات: <b>${n(visits.length)}</b> من <b>${n(nClients)}</b> جهاز<br>
+            🔁 زيارات مُعادة (أكثر من زيارة): <b>${n(returning)}</b> جهاز — بمعدل <b>${nClients ? (visits.length / nClients).toFixed(1) : 0}</b> زيارة لكل جهاز<br>
+            📜 فتحتِ القصيدة: <b>${n(poemOpens)}</b> مرة<br>
+            📏 أعمق نقطة تمرير: <b>${n(maxScroll)}%</b> — وصلتِ النهاية: <b>${n(bottoms)}</b> مرة
+        </p>
+    </div>`;
+
+    html += `<div class="card"><label style="margin-top:0">📋 لكل قسم — الوقت، الاكتشاف، النقرات، التردد</label>
+        <table style="width:100%;border-collapse:collapse;font-size:0.85rem;text-align:center">
+        <tr style="color:#c2255c"><th style="padding:6px">القسم</th><th>رأته</th><th>اكتشفت خلال</th><th>الوقت</th><th>نقرات</th><th>مزدوجة</th><th>متكررة</th><th>ترددت قبل أول نقرة</th></tr>`;
+    for (const s of allSecs) {
+        const disc = secDisc[s] || 0;
+        const t = secTime[s] || 0;
+        const cl = secClicks[s] || 0;
+        const hes = secHes[s] ? avg(secHes[s]) : null;
+        html += `<tr style="border-top:1px solid #f3d3e1">
+            <td style="padding:6px;text-align:right">${SEC_NAMES[s]}</td>
+            <td>${disc ? n(disc) + '×' : '—'}</td>
+            <td>${discMs[s] ? (avg(discMs[s]) / 1000).toFixed(1) + ' ث' : '—'}</td>
+            <td>${t ? mins(t) + ' د' : '—'}</td>
+            <td>${cl ? n(cl) : '—'}</td>
+            <td>${secDbl[s] ? n(secDbl[s]) : '—'}</td>
+            <td>${secRapid[s] ? n(secRapid[s]) : '—'}</td>
+            <td>${hes !== null ? (hes / 1000).toFixed(1) + ' ث' : '—'}</td>
+        </tr>`;
+    }
+    html += '</table></div>';
+
+    if (ignored.length) {
+        html += `<div class="card"><label style="margin-top:0">🙈 أقسام لم تصل إليها بعد</label>
+            <p style="font-size:0.95rem">${ignored.map(s => SEC_NAMES[s]).join(' · ')}</p></div>`;
+    }
+    return html;
 }
 
 // ================= VOICES & HER PHOTOS =================

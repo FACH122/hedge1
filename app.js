@@ -261,6 +261,7 @@
 
     function openPoem() {
         playChime();
+        trackEvent('open_poem', 'poem', {});
         $id('loader-overlay').classList.add('active');
         setTimeout(() => {
             $id('garden-page').style.display = 'none';
@@ -1193,3 +1194,113 @@
             .on('postgres_changes', { event: '*', schema: 'public' }, () => loadContent())
             .subscribe();
     } catch (e) {}
+
+    // ================= ANALYTICS =================
+    const t0 = Date.now();
+    let clientId = localStorage.getItem('clientId');
+    if (!clientId) {
+        clientId = crypto.randomUUID();
+        localStorage.setItem('clientId', clientId);
+    }
+    const anQueue = [];
+    let anLastFlush = Date.now();
+    function trackEvent(name, section, detail) {
+        anQueue.push({ client_id: clientId, name, section: section || null, detail: detail || null });
+        if (anQueue.length >= 8 || Date.now() - anLastFlush > 10000) anFlush();
+    }
+    function anFlush() {
+        if (!anQueue.length) return;
+        const batch = anQueue.splice(0, anQueue.length);
+        anLastFlush = Date.now();
+        fetch(`${SUPABASE_URL}/rest/v1/analytics_events`, {
+            method: 'POST',
+            headers: {
+                apikey: SUPABASE_ANON_KEY,
+                Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json',
+                Prefer: 'return=minimal'
+            },
+            body: JSON.stringify(batch),
+            keepalive: true
+        }).catch(() => {});
+    }
+    let visitCount = +localStorage.getItem('visitCount') || 0;
+    visitCount++;
+    localStorage.setItem('visitCount', visitCount);
+    trackEvent('visit', null, { n: visitCount });
+
+    let lastBeat = Date.now();
+    setInterval(() => {
+        if (document.hidden) return;
+        const s = Math.round((Date.now() - lastBeat) / 1000);
+        lastBeat = Date.now();
+        if (s >= 5) trackEvent('time', 'overall', { s });
+    }, 15000);
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            const s = Math.round((Date.now() - lastBeat) / 1000);
+            lastBeat = Date.now();
+            if (s >= 5) trackEvent('time', 'overall', { s });
+            anFlush();
+        } else {
+            lastBeat = Date.now();
+        }
+    });
+    addEventListener('pagehide', anFlush);
+
+    const secEnter = {}, secFirstSeen = {}, hesSent = {}, clickLog = {};
+    const secIO = new IntersectionObserver(entries => {
+        for (const en of entries) {
+            const s = en.target.dataset.sec;
+            if (en.isIntersecting) {
+                secEnter[s] = Date.now();
+                if (!secFirstSeen[s]) {
+                    secFirstSeen[s] = true;
+                    trackEvent('discover', s, { ms: Date.now() - t0 });
+                }
+            } else if (secEnter[s]) {
+                const ms = Date.now() - secEnter[s];
+                if (ms > 400) trackEvent('section_time', s, { ms });
+                delete secEnter[s];
+            }
+        }
+    }, { threshold: 0.3 });
+    document.querySelectorAll('[data-sec]').forEach(el => secIO.observe(el));
+
+    document.addEventListener('pointerdown', e => {
+        const secEl = e.target.closest('[data-sec]');
+        if (!secEl) return;
+        const s = secEl.dataset.sec;
+        const now = Date.now();
+        const el = e.target.closest('button,.box,.mem-card,.slide-tile,.candle,.cookie,.gift,.heart-wrap,#balloon-canvas,#stars-canvas') || e.target;
+        const key = el.id || String(el.className).slice(0, 24);
+        clickLog[key] = (clickLog[key] || []).filter(t => now - t < 800);
+        clickLog[key].push(now);
+        trackEvent('click', s, {
+            t: key,
+            dbl: clickLog[key].length >= 2,
+            rapid: clickLog[key].length >= 4
+        });
+        if (secEnter[s] && !hesSent[s]) {
+            hesSent[s] = true;
+            trackEvent('hesitate', s, { ms: now - secEnter[s] });
+        }
+    }, true);
+
+    let maxDepth = 0, bottomSent = false, scrollTick = false;
+    addEventListener('scroll', () => {
+        if (scrollTick) return;
+        scrollTick = true;
+        setTimeout(() => {
+            scrollTick = false;
+            const pct = Math.round((scrollY + innerHeight) / document.documentElement.scrollHeight * 100);
+            if (pct > maxDepth) {
+                maxDepth = pct;
+                if ([25, 50, 75, 100].includes(pct)) trackEvent('scroll', null, { pct });
+            }
+            if (!bottomSent && pct >= 95) {
+                bottomSent = true;
+                trackEvent('bottom', null, {});
+            }
+        }, 300);
+    }, { passive: true });

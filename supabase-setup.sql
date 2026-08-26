@@ -120,3 +120,26 @@ create policy "admin uploads rewards"
     on storage.objects for insert
     to authenticated
     with check (bucket_id = 'rewards');
+
+-- ---------- 5. analytics events (her activity stats) ----------
+create table if not exists public.analytics_events (
+    id         bigint generated always as identity primary key,
+    client_id  text not null,
+    name       text not null,
+    section    text,
+    detail     jsonb,
+    created_at timestamptz not null default now()
+);
+alter table public.analytics_events enable row level security;
+
+drop policy if exists "anon inserts analytics" on public.analytics_events;
+create policy "anon inserts analytics"
+    on public.analytics_events for insert
+    to anon, authenticated
+    with check (true);
+
+drop policy if exists "admin reads analytics" on public.analytics_events;
+create policy "admin reads analytics"
+    on public.analytics_events for select
+    to authenticated
+    using (true);

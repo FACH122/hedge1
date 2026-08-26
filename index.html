@@ -33,7 +33,7 @@
             <span>عالَمٌ وردِيّ من الأحلام</span>
         </div>
 
-        <section class="hero trigger-poem">
+        <section class="hero trigger-poem" data-sec="hero">
             <img class="bg" src="https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=1600&auto=format&fit=crop" alt="Pink Garden">
             <div class="hero-content">
                 <h2>حديقةُ الأحلام</h2>
@@ -42,13 +42,13 @@
             </div>
         </section>
 
-        <div class="card">
+        <div class="card" data-sec="daily">
             <span class="label">✦ رسالة اليوم ✦</span>
             <p id="daily-text"></p>
             <p id="memory-text"></p>
         </div>
 
-        <div class="card reason-box">
+        <div class="card reason-box" data-sec="reason">
             <div style="position:relative;z-index:2;width:100%">
                 <span class="reason-hint">✦ سببٌ من قلبي — اكتشفيه بلمسة ✦</span>
                 <p id="reason-text" style="margin:0">...</p>
@@ -115,7 +115,7 @@
             <button class="btn btn-ghost" id="candles-relight" style="display:none">✦ أشعليها من جديد ✦</button>
         </div>
 
-        <div class="card" style="padding-bottom:22px">
+        <div class="card" style="padding-bottom:22px" data-sec="boxes">
             <span class="label">🧩 صناديق الألغاز</span>
             <p style="color:var(--text-sub);font-size:0.95rem;margin-bottom:18px">كل يومٍ تُفتح صندوقةٌ جديدة... حلّي المفتوح ثم انتظري القادم ✨</p>
             <div id="boxes-grid"></div>
@@ -228,6 +228,6 @@
     <button id="install-btn">✦ Install App</button>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=18" defer></script>
+    <script src="app.js?v=19" defer></script>
 </body>
 </html>
