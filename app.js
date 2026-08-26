@@ -407,7 +407,7 @@
     function onBoxClick(i) {
         const p = puzzles[i];
         const st = boxState(p);
-        if (st === 'solved') { showReward(p); return; }
+        if (st === 'solved') { showToast('✔ حُلّت من قبل — لا يمكن فتحها مجدداً'); return; }
         if (st === 'locked') { showToast('🔒 تُفتح في ' + p.unlock); return; }
         openDetail(p, i);
     }

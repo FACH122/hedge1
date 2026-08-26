@@ -453,7 +453,7 @@ async function uploadImg(file, btn) {
     if (file.size > 8 * 1024 * 1024) return setStatus(card, '✕ الصورة كبيرة جداً — الحد ٨ ميغا', false);
 
     const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-    const fname = `reward-${Date.now()}.${ext}`;
+    const fname = `reward-${crypto.randomUUID()}.${ext}`;
     const url = `${SB_URL}/storage/v1/object/rewards/${fname}`;
 
     btn.disabled = true;
