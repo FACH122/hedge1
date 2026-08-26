@@ -200,14 +200,17 @@
         });
     }, { threshold: 0.12 });
 
+    function renderLine(line) {
+        return esc(line).split('**').map((part, i) =>
+            i % 2 === 1 ? `<span class="highlight">${part}</span>` : part
+        ).join('');
+    }
+
     function buildPoem() {
         const stanzas = (poemData && poemData.length) ? poemData : DEFAULT_POEM;
         const list = document.getElementById('stanza-list');
         list.innerHTML = stanzas.map(lines => {
-            const inner = lines.map(line => {
-                const h = line.startsWith('**');
-                return `<span class="verse-line ${h ? 'highlight' : ''}">${esc(h ? line.slice(2) : line)}</span>`;
-            }).join('');
+            const inner = lines.map(line => `<span class="verse-line">${renderLine(line)}</span>`).join('');
             return `<article class="stanza">${inner}</article>`;
         }).join('');
         const last = list.lastElementChild;
