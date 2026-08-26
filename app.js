@@ -442,7 +442,7 @@
         const d = esx.getImageData(0, 0, envSeal.width, envSeal.height).data;
         let clear = 0;
         for (let i = 3; i < d.length; i += 40) if (d[i] === 0) clear++;
-        if (clear / (d.length / 40) > 0.45) openEnvelope();
+        if (clear / (d.length / 40) > 0.35) openEnvelope();
     }
     addEventListener('resize', () => { if (!envOpen) initEnvSeal(); });
 
