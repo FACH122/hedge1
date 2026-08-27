@@ -387,8 +387,3 @@
         .breath-wrap { position:relative; width:min(200px,70%); aspect-ratio:1; margin:12px auto 0; display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none; touch-action:none; }
         .breath-progress { position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); }
         .breath-circle { width:70%; aspect-ratio:1; border-radius:50%; background:var(--grad); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-family:'Montserrat',sans-serif; letter-spacing:2px; font-size:0.85rem; text-transform:uppercase; transition:transform 0.3s ease; box-shadow:0 16px 32px rgba(214,51,108,0.3); }
-
-        .wheel-pointer { position:absolute; top:-2px; left:50%; transform:translateX(-50%); font-size:1.3rem; color:var(--accent); z-index:2; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
-        .breath-wrap { position:relative; width:min(200px,70%); aspect-ratio:1; margin:12px auto 0; display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none; touch-action:none; }
-        .breath-progress { position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); }
-        .breath-circle { width:70%; aspect-ratio:1; border-radius:50%; background:var(--grad); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-family:'Montserrat',sans-serif; letter-spacing:2px; font-size:0.85rem; text-transform:uppercase; transition:transform 0.3s ease; box-shadow:0 16px 32px rgba(214,51,108,0.3); }
