@@ -411,6 +411,8 @@
     const FALLBACK_STARS_MSG = 'حتى النجوم ترسمُ قلوبًا حينَ أفكّر فيكِ.';
     const FALLBACK_CANDLES_TITLE = '✦ أمنيتي ✦';
     const FALLBACK_CANDLES_MSG = 'انفختِها كلَّها... وكل أمنياتكِ عندي مستجابة.';
+    const FALLBACK_FORTUNES = ['حظّك اليوم: قلب يحبّكِ بصمت.', 'حظّك اليوم: رسالة قادمة ممن يفكّر بكِ.', 'حظّك اليوم: ابتسامتكِ تغيّر يوم أحدهم.', 'حظّك اليوم: أمنية تتحقّق قريباً.', 'حظّك اليوم: أنتِ محظوظة لأنكِ أنتِ.', 'حظّك اليوم: مفاجأة حلوة في الطريق.', 'حظّك اليوم: شخص ما يشتاق إليكِ الآن.', 'حظّك اليوم: يومكِ سيكون جميلاً مثلكِ.'];
+    const FALLBACK_BREATH_MSG = 'شهيق... زفير... أنتِ هنا معي. أحبّكِ بكل نفس. ✦';
 
     function intBalloonMessages() { return (Array.isArray(interactions.balloonMessages) && interactions.balloonMessages.length) ? interactions.balloonMessages : FALLBACK_BALLOON_MSGS; }
     function intHeartMessage() { return interactions.heartMessage || FALLBACK_HEART_MSG; }
@@ -420,6 +422,8 @@
     function intStarsMessage() { return interactions.starsMessage || FALLBACK_STARS_MSG; }
     function intCandlesTitle() { return interactions.candlesTitle || FALLBACK_CANDLES_TITLE; }
     function intCandlesMessage() { return interactions.candlesMessage || FALLBACK_CANDLES_MSG; }
+    function intFortunes() { return (Array.isArray(interactions.fortunes) && interactions.fortunes.length) ? interactions.fortunes : FALLBACK_FORTUNES; }
+    function intBreathMessage() { return interactions.breathMessage || FALLBACK_BREATH_MSG; }
 
     function revealMessage(title, text) {
         $id('reveal-title').textContent = title;
@@ -442,6 +446,8 @@
 
     function applyInteractions() {
         initBalloons();
+        initWheel();
+        initBreath();
         initSlide();
         initMemory();
         initStars();
@@ -762,6 +768,202 @@
         }
     });
     $id('candles-relight').addEventListener('click', initCandles);
+
+    // FORTUNE WHEEL
+    const wheelCanvas = document.getElementById('wheel-canvas');
+    const wctx = wheelCanvas ? wheelCanvas.getContext('2d') : null;
+    let wheelAngle = 0, wheelVel = 0, wheelSpinning = false, wheelDragging = false, wheelLastAngle = 0, wheelLastTime = 0;
+    const WHEEL_COLORS = ['#f783ac','#e64980','#ffb3cf','#c2255c','#f9c0d5','#d6336c','#fce7f1','#ff8fab'];
+    function drawWheel() {
+        if (!wctx) return;
+        const fortunes = intFortunes();
+        const n = fortunes.length || 8;
+        const cx = 150, cy = 150, r = 148;
+        wctx.clearRect(0,0,300,300);
+        wctx.save();
+        wctx.translate(cx,cy);
+        wctx.rotate(wheelAngle);
+        for (let i=0;i<n;i++) {
+            wctx.beginPath();
+            wctx.moveTo(0,0);
+            wctx.arc(0,0,r, i*2*Math.PI/n, (i+1)*2*Math.PI/n);
+            wctx.closePath();
+            wctx.fillStyle = WHEEL_COLORS[i % WHEEL_COLORS.length];
+            wctx.fill();
+            wctx.strokeStyle = 'rgba(255,255,255,0.6)'; wctx.lineWidth = 2; wctx.stroke();
+            wctx.save();
+            wctx.rotate((i+0.5)*2*Math.PI/n);
+            wctx.textAlign = 'right';
+            wctx.fillStyle = '#fff';
+            wctx.font = 'bold 11px Montserrat, sans-serif';
+            const txt = fortunes[i].slice(0,18);
+            wctx.fillText(txt, r-12, 4);
+            wctx.restore();
+        }
+        wctx.fillStyle = '#fff'; wctx.beginPath(); wctx.arc(0,0,28,0,Math.PI*2); wctx.fill();
+        wctx.fillStyle = '#c2255c'; wctx.font = 'bold 16px serif'; wctx.textAlign='center'; wctx.textBaseline='middle';
+        wctx.fillText('✦',0,1);
+        wctx.restore();
+    }
+    function wheelAngleFromEvent(e) {
+        const rect = wheelCanvas.getBoundingClientRect();
+        const cx = rect.left + rect.width/2, cy = rect.top + rect.height/2;
+        return Math.atan2(e.clientY - cy, e.clientX - cx);
+    }
+    function spinWheelWithVelocity(v) {
+        wheelVel = v;
+        wheelSpinning = true;
+        (function animate(){
+            if (!wheelSpinning) return;
+            wheelAngle += wheelVel;
+            wheelVel *= 0.985;
+            if (Math.abs(wheelVel) < 0.002) {
+                wheelSpinning = false;
+                const fortunes = intFortunes();
+                const n = fortunes.length || 8;
+                const normalized = ((wheelAngle % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
+                const idx = Math.floor((2*Math.PI - normalized + Math.PI/n) % (2*Math.PI) / (2*Math.PI/n)) % n;
+                setTimeout(()=> { revealMessage('🎡 حظّكِ', fortunes[idx]); burst(innerWidth/2, innerHeight/2, 50); playChime(); }, 300);
+                return;
+            }
+            drawWheel();
+            requestAnimationFrame(animate);
+        })();
+    }
+    function initWheel() {
+        const vis = (interactions.visibility || {}).wheel !== false;
+        const card = document.getElementById('wheel-card');
+        if (card) card.style.display = vis ? '' : 'none';
+        wheelAngle = Math.random()*Math.PI; wheelVel = 0; wheelSpinning = false;
+        drawWheel();
+    }
+    if (wheelCanvas) {
+        wheelCanvas.addEventListener('pointerdown', e => {
+            if (wheelSpinning) return;
+            wheelDragging = true;
+            wheelLastAngle = wheelAngleFromEvent(e);
+            wheelLastTime = Date.now();
+            wheelVel = 0;
+            wheelCanvas.setPointerCapture(e.pointerId);
+            wheelCanvas.style.cursor = 'grabbing';
+        });
+        wheelCanvas.addEventListener('pointermove', e => {
+            if (!wheelDragging || wheelSpinning) return;
+            const a = wheelAngleFromEvent(e);
+            const delta = a - wheelLastAngle;
+            let norm = delta; while (norm > Math.PI) norm -= 2*Math.PI; while (norm < -Math.PI) norm += 2*Math.PI;
+            wheelAngle += norm;
+            const dt = Math.max(1, Date.now() - wheelLastTime);
+            wheelVel = norm / dt * 16;
+            wheelLastAngle = a; wheelLastTime = Date.now();
+            drawWheel();
+        });
+        const endDrag = e => {
+            if (!wheelDragging) return;
+            wheelDragging = false;
+            wheelCanvas.style.cursor = 'grab';
+            if (Math.abs(wheelVel) > 0.03) spinWheelWithVelocity(wheelVel);
+            else if (Math.abs(wheelVel) > 0.005) spinWheelWithVelocity(wheelVel * 2);
+        };
+        wheelCanvas.addEventListener('pointerup', endDrag);
+        wheelCanvas.addEventListener('pointercancel', endDrag);
+        document.getElementById('wheel-spin')?.addEventListener('click', () => {
+            if (wheelSpinning) return;
+            spinWheelWithVelocity(0.18 + Math.random()*0.12);
+        });
+        initWheel();
+    }
+
+    // BREATH TOGETHER
+    let breathPhase = 0, breathCycle = 0, breathHolding = false, breathRAF = null, breathStartTime = 0;
+    const breathRing = document.getElementById('breath-ring');
+    const breathText = document.getElementById('breath-text');
+    const breathCounter = document.getElementById('breath-counter');
+    const breathCircle = document.getElementById('breath-circle');
+    const BREATH_LABELS = ['استنشاق','حبس','زفير'];
+    const BREATH_COLORS = ['#e64980','#c2255c','#f783ac'];
+    function initBreath() {
+        const vis = (interactions.visibility || {}).breath !== false;
+        const card = document.getElementById('breath-card');
+        if (card) card.style.display = vis ? '' : 'none';
+        breathPhase = 0; breathCycle = 0; breathHolding = false;
+        if (breathRing) breathRing.style.strokeDashoffset = '289';
+        if (breathText) breathText.textContent = 'اضغطي للبدء';
+        if (breathCounter) breathCounter.textContent = '';
+        if (breathCircle) breathCircle.style.transform = 'scale(0.85)';
+        if (breathRAF) cancelAnimationFrame(breathRAF);
+        breathRAF = null;
+    }
+    function breathTick() {
+        if (!breathHolding) return;
+        const elapsed = (Date.now() - breathStartTime) / 1000;
+        const phaseDuration = 4;
+        const totalCycle = 12;
+        const t = elapsed % totalCycle;
+        let phase, progress;
+        if (t < 4) { phase = 0; progress = t / 4; }
+        else if (t < 8) { phase = 1; progress = (t - 4) / 4; }
+        else { phase = 2; progress = (t - 8) / 4; }
+        if (phase !== breathPhase) {
+            breathPhase = phase;
+            breathText.textContent = BREATH_LABELS[phase];
+            breathText.style.color = BREATH_COLORS[phase];
+        }
+        const scale = phase === 0 ? 0.85 + progress * 0.3 : phase === 1 ? 1.15 : 1.15 - progress * 0.3;
+        breathCircle.style.transform = `scale(${scale})`;
+        breathCircle.style.background = phase === 1 ? 'linear-gradient(135deg,#c2255c,#a61e4d)' : 'var(--grad)';
+        const totalProgress = (elapsed % totalCycle) / totalCycle;
+        const ringOffset = 289 * (1 - (breathCycle * 3 + phase + progress) / 9);
+        // actually progress across 3 cycles: 3 cycles * 12s = 36s total
+        const overall = (breathCycle * totalCycle + elapsed % totalCycle + breathCycle * 0) / 36;
+        // simpler: overall progress = (breathCycle*12 + (elapsed % 12)) / 36
+        const overallProg = (breathCycle * 12 + (elapsed % 12)) / 36;
+        breathRing.style.strokeDashoffset = String(289 * (1 - Math.min(overallProg,1)));
+        breathRing.style.stroke = BREATH_COLORS[phase];
+        if (t < 0.05 && elapsed > 0.5) {
+            // cycle completed when t wraps
+        }
+        // detect cycle completion
+        if (elapsed >= 12) {
+            breathCycle++;
+            breathStartTime = Date.now();
+            breathCounter.textContent = `الدورة ${breathCycle} / 3`;
+            if (breathCycle >= 3) {
+                breathHolding = false;
+                breathCounter.textContent = 'أحسنتِ ✦';
+                burst(innerWidth/2, innerHeight/2, 70);
+                playChime();
+                revealMessage('🌬️', intBreathMessage());
+                setTimeout(initBreath, 1500);
+                return;
+            }
+        }
+        breathRAF = requestAnimationFrame(breathTick);
+    }
+    const breathWrap = document.getElementById('breath-wrap');
+    if (breathWrap) {
+        breathWrap.addEventListener('pointerdown', e => {
+            if (breathHolding) return;
+            breathHolding = true;
+            breathWrap.setPointerCapture(e.pointerId);
+            breathStartTime = Date.now() - breathPhase * 4000 - (parseFloat(breathRing.style.strokeDashoffset||289)/289*0);
+            // reset to start
+            breathPhase = 0; breathCycle = 0;
+            breathCounter.textContent = 'الدورة 1 / 3';
+            breathTick();
+        });
+        breathWrap.addEventListener('pointerup', () => {
+            breathHolding = false;
+            if (breathRAF) cancelAnimationFrame(breathRAF);
+            breathText.textContent = 'استمري بالضغط';
+            setTimeout(()=> { if (!breathHolding) initBreath(); }, 1200);
+        });
+        breathWrap.addEventListener('pointercancel', () => {
+            breathHolding = false;
+            if (breathRAF) cancelAnimationFrame(breathRAF);
+        });
+        initBreath();
+    }
 
     const bCanvas = document.getElementById('balloon-canvas');
     const bcx = bCanvas.getContext('2d');

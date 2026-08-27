@@ -130,6 +130,12 @@
             <label class="lbl">🎈 رسائل البالونات (رسالة في كل سطر)</label>
             <textarea class="big-ta" id="ta-balloons"></textarea>
 
+            <label class="lbl">🎡 حِكم عجلة الحظ (حكمة في كل سطر)</label>
+            <textarea class="big-ta" id="ta-fortunes"></textarea>
+
+            <label class="lbl">🌬️ رسالة التنفّس معاً (بعد 3 دورات)</label>
+            <textarea class="big-ta" id="ta-breath"></textarea>
+
             <label class="lbl">❤️ رسالة القلب (تظهر عند امتلائه)</label>
             <textarea class="big-ta" id="ta-heart"></textarea>
 
@@ -170,8 +176,10 @@
             </div>
 
             <label class="lbl" style="margin-top:14px">👁️ إظهار الأقسام في الموقع</label>
-            <div class="toolbar" style="justify-content:flex-start;gap:14px">
+            <div class="toolbar" style="justify-content:flex-start;gap:14px;flex-wrap:wrap">
                 <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="ck-balloons"> 🎈 البالونات</label>
+                <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="ck-wheel"> 🎡 العجلة</label>
+                <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="ck-breath"> 🌬️ التنفّس</label>
                 <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="ck-heart"> ❤️ القلب</label>
                 <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="ck-gift"> 🎁 الهدية</label>
                 <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="ck-slide"> 🖼️ البازل</label>
@@ -314,10 +322,14 @@ async function loadAll() {
         }
         INT_RAW = map.interactions || {};
         $id('ta-balloons').value = (INT_RAW.balloonMessages || []).join('\n');
+        $id('ta-fortunes').value = (INT_RAW.fortunes || []).join('\n');
+        $id('ta-breath').value = INT_RAW.breathMessage || '';
         $id('ta-heart').value = INT_RAW.heartMessage || '';
         $id('ta-gift').value = INT_RAW.giftMessage || '';
         const vis = INT_RAW.visibility || {};
         $id('ck-balloons').checked = vis.balloons !== false;
+        $id('ck-wheel').checked = vis.wheel !== false;
+        $id('ck-breath').checked = vis.breath !== false;
         $id('ck-heart').checked = vis.heart !== false;
         $id('ck-gift').checked = vis.gift !== false;
         $id('ck-slide').checked = vis.slide !== false;
@@ -653,6 +665,8 @@ async function saveInteractions() {
         await saveKey('interactions', {
             ...INT_RAW,
             balloonMessages: $id('ta-balloons').value.split('\n').map(s => s.trim()).filter(Boolean),
+            fortunes: $id('ta-fortunes').value.split('\n').map(s => s.trim()).filter(Boolean),
+            breathMessage: $id('ta-breath').value.trim(),
             heartMessage: $id('ta-heart').value.trim(),
             giftMessage: $id('ta-gift').value.trim(),
             memoryLetter: $id('ta-memory-letter').value.trim(),
@@ -661,6 +675,8 @@ async function saveInteractions() {
             candlesMessage: $id('ta-candles').value.trim(),
             visibility: {
                 balloons: $id('ck-balloons').checked,
+                wheel: $id('ck-wheel').checked,
+                breath: $id('ck-breath').checked,
                 heart: $id('ck-heart').checked,
                 gift: $id('ck-gift').checked,
                 slide: $id('ck-slide').checked,
@@ -773,6 +789,7 @@ async function uploadImg(file, btn) {
 
 // ================= STATS =================
 const SEC_NAMES = { hero:'🖼️ الواجهة (القصيدة)', daily:'💬 رسالة اليوم', reason:'💗 أسباب الحب', balloons:'🎈 البالونات',
+    wheel:'🎡 العجلة', breath:'🌬️ التنفّس',
     heart:'❤️ القلب', gift:'🎁 الهدية', slide:'🖼️ البازل', memory:'🧩 الذاكرة', stars:'🌌 النجوم',
     candles:'🎂 الشموع', boxes:'🧩 صناديق الألغاز', other:'أخرى' };
 

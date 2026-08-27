@@ -18,7 +18,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="styles.css?v=18">
+    <link rel="stylesheet" href="styles.css?v=23">
 </head>
 <body>
 
@@ -113,6 +113,56 @@
             <p class="hint-line">انفخي في الميكروفون — أو المسِ الشموع بإصبعك</p>
             <button class="mini-btn" id="candles-start">🎤 جاهزة؟ اضغطي ثم انفخي</button>
             <button class="btn btn-ghost" id="candles-relight" style="display:none">✦ أشعليها من جديد ✦</button>
+        </div>
+
+        <div class="card" id="wheel-card" style="text-align:center" data-sec="wheel">
+            <span class="label">✦ عجلة الحظ ✦</span>
+            <div class="wheel-wrap" style="position:relative;width:min(300px,90%);margin:0 auto">
+                <div class="wheel-pointer">▼</div>
+                <canvas id="wheel-canvas" width="300" height="300" style="width:100%;aspect-ratio:1;display:block;touch-action:none;cursor:grab;border-radius:50%"></canvas>
+            </div>
+            <p class="hint-line">اسحبي العجلة لتدويرها</p>
+            <button class="btn btn-ghost" id="wheel-spin">✦ لفّيها ✦</button>
+        </div>
+
+        <div class="card" id="breath-card" style="text-align:center" data-sec="breath">
+            <span class="label">✦ تنفّسي معي ✦</span>
+            <div class="breath-wrap" id="breath-wrap">
+                <svg class="breath-progress" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(214,51,108,0.15)" stroke-width="4"/>
+                    <circle id="breath-ring" cx="50" cy="50" r="46" fill="none" stroke="#e64980" stroke-width="4" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="289" transform="rotate(-90 50 50)"/>
+                </svg>
+                <div class="breath-circle" id="breath-circle">
+                    <span id="breath-text">استنشاق</span>
+                </div>
+            </div>
+            <p class="hint-line">اضغطي باستمرار وتابعي الإيقاع — 3 دورات للفوز</p>
+            <p id="breath-counter" style="font-size:0.85rem;color:var(--accent);margin-top:8px"></p>
+        </div>
+
+        <div class="card" id="wheel-card" style="text-align:center">
+            <span class="label">✦ عجلة الحظ ✦</span>
+            <div class="wheel-wrap" style="position:relative;width:min(300px,90%);margin:0 auto">
+                <div class="wheel-pointer">▼</div>
+                <canvas id="wheel-canvas" width="300" height="300" style="width:100%;aspect-ratio:1;display:block;touch-action:none;cursor:grab"></canvas>
+            </div>
+            <p class="hint-line">اسحبي العجلة لتدويرها</p>
+            <button class="btn btn-ghost" id="wheel-spin">✦ لفّيها ✦</button>
+        </div>
+
+        <div class="card" id="breath-card" style="text-align:center">
+            <span class="label">✦ تنفّسي معي ✦</span>
+            <div class="breath-wrap" id="breath-wrap">
+                <svg class="breath-progress" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(214,51,108,0.15)" stroke-width="4"/>
+                    <circle id="breath-ring" cx="50" cy="50" r="46" fill="none" stroke="#e64980" stroke-width="4" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="289" transform="rotate(-90 50 50)"/>
+                </svg>
+                <div class="breath-circle" id="breath-circle">
+                    <span id="breath-text">استنشاق</span>
+                </div>
+            </div>
+            <p class="hint-line">اضغطي باستمرار وتابعي الإيقاع — 3 دورات للفوز</p>
+            <p id="breath-counter" style="font-size:0.85rem;color:var(--accent);margin-top:8px"></p>
         </div>
 
         <div class="card" style="padding-bottom:22px" data-sec="boxes">
@@ -228,6 +278,6 @@
     <button id="install-btn">✦ Install App</button>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=22" defer></script>
+    <script src="app.js?v=23" defer></script>
 </body>
 </html>
