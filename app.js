@@ -706,6 +706,105 @@
     });
     $id('stars-reset').addEventListener('click', initStars);
 
+    // DRAW & GUESS
+    (function initDraw(){
+        const cvs = $id('draw-canvas');
+        if (!cvs) return;
+        const ctx = cvs.getContext('2d');
+        let drawing = false, brushColor = '#2f2a24', brushW = 3;
+        const history = [];
+        function resizeDraw(){
+            const rect = cvs.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const w = Math.round(rect.width * dpr), h = Math.round(rect.height * dpr);
+            if (cvs.width === w && cvs.height === h) return;
+            const tmp = document.createElement('canvas'); tmp.width = cvs.width; tmp.height = cvs.height;
+            try{ tmp.getContext('2d').drawImage(cvs, 0, 0); }catch(_){}
+            cvs.width = w; cvs.height = h;
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+            ctx.fillStyle = '#fbf9f2'; ctx.fillRect(0,0,w,h);
+            try{ ctx.drawImage(tmp, 0, 0, w, h); }catch(_){}
+        }
+        function saveHist(){ history.push(cvs.toDataURL()); if(history.length>20) history.shift(); }
+        function xy(e){
+            const r = cvs.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            return { x:(e.clientX - r.left)*dpr, y:(e.clientY - r.top)*dpr };
+        }
+        cvs.addEventListener('pointerdown', e=>{
+            drawing = true; cvs.setPointerCapture(e.pointerId);
+            saveHist();
+            const p = xy(e); ctx.beginPath(); ctx.moveTo(p.x, p.y);
+            ctx.strokeStyle = brushColor; ctx.lineWidth = brushW * (window.devicePixelRatio||1);
+            e.preventDefault();
+        });
+        cvs.addEventListener('pointermove', e=>{
+            if(!drawing) return;
+            const p = xy(e); ctx.lineTo(p.x, p.y); ctx.stroke();
+        });
+        const endDraw = ()=>{ if(drawing){ drawing=false; ctx.beginPath(); } };
+        cvs.addEventListener('pointerup', endDraw);
+        cvs.addEventListener('pointercancel', endDraw);
+        cvs.addEventListener('pointerleave', endDraw);
+        // colors
+        document.querySelectorAll('.draw-color').forEach(b=>{
+            b.addEventListener('click', ()=>{
+                document.querySelectorAll('.draw-color').forEach(x=>x.classList.remove('active'));
+                b.classList.add('active'); brushColor = b.dataset.color;
+            });
+        });
+        $id('draw-clear')?.addEventListener('click', ()=>{
+            saveHist();
+            ctx.fillStyle = '#fbf9f2'; ctx.fillRect(0,0,cvs.width,cvs.height);
+            $id('draw-guess-text').textContent=''; $id('draw-status').textContent='';
+        });
+        $id('draw-undo')?.addEventListener('click', ()=>{
+            if(!history.length) return;
+            const img = new Image();
+            img.onload = ()=>{ ctx.clearRect(0,0,cvs.width,cvs.height); ctx.drawImage(img,0,0); };
+            img.src = history.pop();
+        });
+        const FALLBACK_GUESSES = ['أرى قلبًا يلمع ✨','خربشةٌ جميلة… كضحكتكِ','أرى وردةً… أو ربما أنتِ؟','هذا يشبه حضنًا دافئًا','أرى اسمكِ مكتوبًا بالنجوم','لوحة فنانة — احتفظي بها لي'];
+        function intDrawGuesses(){ const a = interactions.drawGuesses; return Array.isArray(a)&&a.length ? a : FALLBACK_GUESSES; }
+        function isBlank(){
+            try{
+                const d = ctx.getImageData(0,0,cvs.width,cvs.height).data;
+                for(let i=0;i<d.length;i+=4){ if(d[i]!==251 || d[i+1]!==249 || d[i+2]!==242) return false; }
+                return true;
+            }catch(_){ return false; }
+        }
+        $id('draw-guess')?.addEventListener('click', ()=>{
+            if(isBlank()){ showToast('ارسمي شيئًا أولاً ✏️'); return; }
+            const arr = intDrawGuesses();
+            const msg = arr[Math.floor(Math.random()*arr.length)];
+            $id('draw-guess-text').textContent = 'أنا أرى... ' + msg;
+            playChime(); burst(innerWidth/2, innerHeight/2, 50);
+            try{ trackEvent('draw_guess','draw',{});}catch(_){}
+        });
+        $id('draw-save')?.addEventListener('click', async ()=>{
+            if(isBlank()){ showToast('ارسمي شيئًا أولاً ✏️'); return; }
+            const st = $id('draw-status');
+            st.textContent = '⏳ جاري إرسال الرسم...';
+            $id('draw-save').disabled = true;
+            try{
+                const blob = await new Promise(res=> cvs.toBlob(res,'image/png'));
+                await uploadToBucket('voices', blob, `draw-${Date.now()}.png`, 'image/png');
+                playChime(); burst(innerWidth/2, innerHeight/2, 70);
+                showToast('✦ وصلني رسمكِ — سأحتفظ به للأبد');
+                st.textContent='';
+            }catch(e){ st.textContent='تعذّر الإرسال: '+(e.message||'خطأ'); }
+            finally{ $id('draw-save').disabled=false; }
+        });
+        // expose for tab switch resize
+        window._resizeDraw = resizeDraw;
+        // init
+        requestAnimationFrame(()=>{ resizeDraw(); });
+        addEventListener('resize', resizeDraw);
+        // observe tab visibility
+        const obs = new MutationObserver(()=>{ if(cvs.offsetParent) resizeDraw(); });
+        const panel = $id('panel-games'); if(panel) obs.observe(panel, {attributes:true, attributeFilter:['class']});
+    })();
+
     // BLOW THE CANDLES
     let candleOut = 0, candleTotal = 3, candleDone = false, micStream = null;
     function initCandles() {
@@ -1036,6 +1135,38 @@
     addEventListener('resize', initBalloons);
     balloonLoop();
     applyInteractions();
+
+    // ================= TABBED NAV =================
+    (function initTabs(){
+        const bar = $id('tab-bar');
+        if (!bar) return;
+        const btns = bar.querySelectorAll('.tab-btn');
+        const panels = document.querySelectorAll('.tab-panel');
+        const saved = localStorage.getItem('activeTab');
+        function switchTab(id){
+            btns.forEach(b=>{
+                const on = b.dataset.tab===id;
+                b.classList.toggle('active', on);
+                b.setAttribute('aria-selected', on?'true':'false');
+            });
+            panels.forEach(p=> p.classList.toggle('active', p.dataset.panel===id));
+            localStorage.setItem('activeTab', id);
+            try{ trackEvent('tab_switch', id, {}); }catch(_){}
+            // re-init any canvas that just became visible (offsetWidth was 0 while hidden)
+            const active = document.querySelector('.tab-panel.active');
+            if (!active) return;
+            if (active.contains($id('balloon-canvas'))) initBalloons();
+            if (active.contains($id('reason-canvas')) && typeof initReasonFoil==='function' && !rOpen) initReasonFoil();
+            if (active.contains($id('stars-canvas')) && typeof drawStars==='function') drawStars();
+            if (active.contains($id('wheel-canvas')) && typeof drawWheel==='function') drawWheel();
+            if (active.contains($id('draw-canvas')) && window._resizeDraw) window._resizeDraw();
+        }
+        btns.forEach(b=> b.addEventListener('click', ()=> switchTab(b.dataset.tab)));
+        // restore saved tab without scrolling on load
+        if (saved && bar.querySelector(`[data-tab="${saved}"]`)) switchTab(saved);
+        // expose for debugging / external calls
+        window.switchTab = switchTab;
+    })();
 
     // ================= PUZZLE BOXES =================
     function todayStr() {

@@ -18,7 +18,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="styles.css?v=26">
+    <link rel="stylesheet" href="styles.css?v=28">
 </head>
 <body>
 
@@ -28,191 +28,211 @@
     <div class="page" id="garden-page">
         <div class="top-banner">🌸 حديقتي السحرية 🌸</div>
 
-        <!-- ACT I : ARRIVAL -->
-        <section class="movement" data-sec="act-arrival">
-            <div class="brand" id="brand-logo">
-                <h1>Wonderland</h1>
-                <span>عالَمٌ وردِيّ من الأحلام</span>
-            </div>
+        <div class="brand" id="brand-logo">
+            <h1>Wonderland</h1>
+            <span>عالَمٌ وردِيّ من الأحلام</span>
+        </div>
 
-            <section class="hero trigger-poem" data-sec="hero">
-                <img class="bg" src="https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=1600&auto=format&fit=crop" alt="Pink Garden">
-                <div class="hero-content">
-                    <h2>حديقةُ الأحلام</h2>
-                    <p>مكانٌ بنيتُه لكِ... تزهر فيه المفاجآت كلَّ يوم</p>
-                    <span class="hero-cta">استكشفي الحديقة ✦</span>
+        <section class="hero trigger-poem" data-sec="hero">
+            <img class="bg" src="https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=1600&auto=format&fit=crop" alt="Pink Garden">
+            <div class="hero-content">
+                <h2>حديقةُ الأحلام</h2>
+                <p>مكانٌ بنيتُه لكِ... تزهر فيه المفاجآت كلَّ يوم</p>
+                <span class="hero-cta">استكشفي الحديقة ✦</span>
+            </div>
+        </section>
+
+        <!-- TABBED NAV -->
+        <nav class="tab-bar" id="tab-bar" role="tablist" aria-label="أقسام الحديقة">
+            <button class="tab-btn active" data-tab="word" role="tab" aria-selected="true">كلمةٌ لكِ</button>
+            <button class="tab-btn" data-tab="surprises" role="tab" aria-selected="false">مفاجآت</button>
+            <button class="tab-btn" data-tab="moments" role="tab" aria-selected="false">لحظاتنا</button>
+            <button class="tab-btn" data-tab="games" role="tab" aria-selected="false">ألعاب</button>
+            <button class="tab-btn" data-tab="journey" role="tab" aria-selected="false">رحلتنا</button>
+        </nav>
+
+        <div class="tab-panels" id="tab-panels">
+
+            <!-- TAB: WORD -->
+            <section class="tab-panel active" id="panel-word" data-panel="word" role="tabpanel">
+                <div class="card card-focal" data-sec="daily">
+                    <p id="daily-text"></p>
+                    <p id="memory-text"></p>
+                </div>
+                <div class="card reason-box" data-sec="reason">
+                    <div style="position:relative;z-index:2;width:100%">
+                        <span class="reason-hint">✦ سببٌ من قلبي — اكتشفيه بلمسة ✦</span>
+                        <p id="reason-text" style="margin:0">...</p>
+                    </div>
+                    <canvas id="reason-canvas"></canvas>
+                </div>
+                <div style="text-align:center;margin-top:-22px">
+                    <button class="btn btn-ghost" id="reason-btn">✦ سببٌ آخر ✦</button>
                 </div>
             </section>
-        </section>
 
-        <!-- ACT II : A WORD FOR YOU -->
-        <section class="movement" data-sec="act-word">
-            <h3 class="movement-header">كلمةٌ لكِ</h3>
-            <div class="card card-focal" data-sec="daily">
-                <p id="daily-text"></p>
-                <p id="memory-text"></p>
-            </div>
-        </section>
-
-        <!-- ACT III : A REASON FROM MY HEART -->
-        <section class="movement" data-sec="act-reason">
-            <h3 class="movement-header">سببٌ من قلبي</h3>
-            <div class="card reason-box" data-sec="reason">
-                <div style="position:relative;z-index:2;width:100%">
-                    <span class="reason-hint">✦ سببٌ من قلبي — اكتشفيه بلمسة ✦</span>
-                    <p id="reason-text" style="margin:0">...</p>
-                </div>
-                <canvas id="reason-canvas"></canvas>
-            </div>
-            <div style="text-align:center;margin-top:-22px">
-                <button class="btn btn-ghost" id="reason-btn">✦ سببٌ آخر ✦</button>
-            </div>
-        </section>
-
-        <!-- ACT IV : LITTLE SURPRISES -->
-        <section class="movement" data-sec="act-surprises">
-            <h3 class="movement-header">مفاجآت صغيرة</h3>
-
-            <div class="card" id="balloons-card">
-            <span class="label">✦ بالونات المفاجآت ✦</span>
-            <p class="hint-line" style="text-align:center">المسي أي بالون لتكتشفي ما بداخله</p>
-            <canvas id="balloon-canvas"></canvas>
-            <div style="text-align:center;margin-top:6px">
-                <button class="btn btn-ghost" id="balloon-reset">✦ أعيدي البالونات ✦</button>
-            </div>
-        </div>
-
-        <div class="card" id="heart-card" style="text-align:center">
-            <span class="label">✦ القلب ✦</span>
-            <div class="heart-wrap" id="heart-wrap">
-                <span class="heart-bg">🤍</span>
-                <span class="heart-fill" id="heart-fill">❤️</span>
-            </div>
-            <p class="hint-line">اضغطي على القلب باستمرار حتى يمتلئ</p>
-        </div>
-
-        <div class="card" id="gift-card" style="text-align:center">
-            <span class="label">✦ هدية بانتظاركِ ✦</span>
-            <div class="gift" id="gift">🎁</div>
-            <p class="hint-line">رهّجي هاتفكِ لفتحها — أو اضغطي عليها ٥ ضغطات سريعة</p>
-        </div>
-
-        <div class="card" id="candles-card" style="text-align:center">
-            <span class="label" id="candles-label">✦ انفخي الشموع ✦</span>
-            <div class="cake-stage">
-                <div class="candles-row" id="candles-row"></div>
-                <div class="cake-emoji">🎂</div>
-            </div>
-            <p class="hint-line">انفخي في الميكروفون — أو المسِ الشموع بإصبعك</p>
-            <button class="mini-btn" id="candles-start">🎤 جاهزة؟ اضغطي ثم انفخي</button>
-            <button class="btn btn-ghost" id="candles-relight" style="display:none">✦ أشعليها من جديد ✦</button>
-        </div>
-        </section>
-
-        <!-- ACT V : MOMENTS WE SHARE -->
-        <section class="movement" data-sec="act-moments">
-            <h3 class="movement-header">لحظاتٌ نشاركها</h3>
-
-            <div class="card" id="wheel-card" style="text-align:center" data-sec="wheel">
-            <span class="label">✦ عجلة الحظ ✦</span>
-            <div class="wheel-wrap" style="position:relative;width:min(300px,90%);margin:0 auto">
-                <div class="wheel-pointer">▼</div>
-                <canvas id="wheel-canvas" width="300" height="300" style="width:100%;aspect-ratio:1;display:block;touch-action:none;cursor:grab;border-radius:50%"></canvas>
-            </div>
-            <p class="hint-line">اسحبي العجلة لتدويرها</p>
-            <button class="btn btn-ghost" id="wheel-spin">✦ لفّيها ✦</button>
-        </div>
-
-        <div class="card" id="breath-card" style="text-align:center" data-sec="breath">
-            <span class="label">✦ تنفّسي معي ✦</span>
-            <div class="breath-wrap" id="breath-wrap">
-                <svg class="breath-progress" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(176,138,92,0.20)" stroke-width="4"/>
-                    <circle id="breath-ring" cx="50" cy="50" r="46" fill="none" stroke="#b08a5c" stroke-width="4" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="289" transform="rotate(-90 50 50)"/>
-                </svg>
-                <div class="breath-circle" id="breath-circle">
-                    <span id="breath-text">استنشاق</span>
-                </div>
-            </div>
-            <p class="hint-line">اضغطي باستمرار وتابعي الإيقاع — 3 دورات للفوز</p>
-            <p id="breath-counter" style="font-size:0.85rem;color:var(--accent);margin-top:8px"></p>
-        </div>
-        </section>
-
-        <!-- ACT VI : MEMORY GAMES -->
-        <section class="movement" data-sec="act-games">
-            <h3 class="movement-header">ألعاب الذكريات</h3>
-
-            <div class="card" id="slide-card" style="text-align:center">
-            <span class="label">✦ بازل الصورة ✦</span>
-            <div class="slide-board" id="slide-board"></div>
-            <p class="hint-line" id="slide-hint" style="margin-top:12px">حركّي المربعات حتى تكتمل الصورة</p>
-            <button class="btn btn-ghost" id="slide-reset">✦ خلط من جديد ✦</button>
-        </div>
-
-        <div class="card" id="memory-card" style="text-align:center">
-            <span class="label">✦ لعبة الذاكرة ✦</span>
-            <div class="memory-board" id="memory-board"></div>
-            <p class="hint-line" id="memory-hint" style="margin-top:12px">طابقي الصور المتشابهة</p>
-            <button class="btn btn-ghost" id="memory-reset">✦ لعبة جديدة ✦</button>
-        </div>
-
-        <div class="card" id="stars-card" style="text-align:center">
-            <span class="label">✦ رسم النجوم ✦</span>
-            <canvas id="stars-canvas" style="width:100%;max-width:340px"></canvas>
-            <p class="hint-line">صلي النجوم بالترتيب: من كل نجمة مرقّمة إلى التي تليها</p>
-            <button class="btn btn-ghost" id="stars-reset">✦ من جديد ✦</button>
-        </div>
-        </section>
-
-        <!-- ACT VII : OUR JOURNEY -->
-        <section class="movement" data-sec="act-journey">
-            <h3 class="movement-header">رحلتُنا</h3>
-
-            <div class="card card-focal" style="padding-bottom:22px" data-sec="boxes">
-            <span class="label">🧩 صناديق الألغاز</span>
-            <p style="color:var(--text-sub);font-size:0.95rem;margin-bottom:18px">كل يومٍ تُفتح صندوقةٌ جديدة... حلّي المفتوح ثم انتظري القادم ✨</p>
-            <div id="boxes-grid"></div>
-
-            <div id="box-detail" style="display:none">
-                <div class="progress" id="box-progress"></div>
-                <p id="box-question"></p>
-                <div class="answer-row">
-                    <input type="text" id="box-answer" placeholder="اكتبي جوابك هنا..." autocomplete="off">
-                    <button class="btn" id="box-submit">تحقّقي</button>
-                </div>
-                <p class="wrong-msg" id="box-wrong" style="display:none">ليس هذا الجواب... فكّري مجددًا ✦</p>
-
-                <div id="reward-view" style="display:none">
-                    <div class="reward-badge">✦ إجابةٌ صحيحة! ✦</div>
-                    <img id="reward-image" alt="" draggable="false" style="display:none">
-                    <p id="reward-text"></p>
-                    <p class="next-hint" id="next-hint"></p>
-                </div>
-
-                <div class="rec-zone" id="rec-zone" style="display:none">
-                    <div class="rec-divider">— ما عرفتي؟ اسأليني —</div>
-                    <button class="mini-btn" id="rec-start">🎤 سجّلي رسالة صوتية</button>
-                    <div id="rec-active" style="display:none">
-                        <div class="rec-row"><span class="rec-dot"></span><span class="rec-timer" id="rec-timer">0:00</span>
-                        <button class="mini-btn" id="rec-stop">■ إيقاف</button></div>
+            <!-- TAB: SURPRISES -->
+            <section class="tab-panel" id="panel-surprises" data-panel="surprises" role="tabpanel">
+                <div class="card" id="balloons-card">
+                    <span class="label">✦ بالونات المفاجآت ✦</span>
+                    <p class="hint-line" style="text-align:center">المسي أي بالون لتكتشفي ما بداخله</p>
+                    <canvas id="balloon-canvas"></canvas>
+                    <div style="text-align:center;margin-top:6px">
+                        <button class="btn btn-ghost" id="balloon-reset">✦ أعيدي البالونات ✦</button>
                     </div>
-                    <div id="rec-review" style="display:none">
-                        <audio controls id="rec-player" class="rec-player"></audio>
-                        <div class="rec-row">
-                            <button class="btn" id="rec-send" style="padding:11px 24px;font-size:0.78rem">✦ إرسالي الصوت</button>
-                            <button class="mini-btn" id="rec-redo">↺ من جديد</button>
+                </div>
+
+                <div class="card" id="heart-card" style="text-align:center">
+                    <span class="label">✦ القلب ✦</span>
+                    <div class="heart-wrap" id="heart-wrap">
+                        <span class="heart-bg">🤍</span>
+                        <span class="heart-fill" id="heart-fill">❤️</span>
+                    </div>
+                    <p class="hint-line">اضغطي على القلب باستمرار حتى يمتلئ</p>
+                </div>
+
+                <div class="card" id="gift-card" style="text-align:center">
+                    <span class="label">✦ هدية بانتظاركِ ✦</span>
+                    <div class="gift" id="gift">🎁</div>
+                    <p class="hint-line">رهّجي هاتفكِ لفتحها — أو اضغطي عليها ٥ ضغطات سريعة</p>
+                </div>
+
+                <div class="card" id="candles-card" style="text-align:center">
+                    <span class="label" id="candles-label">✦ انفخي الشموع ✦</span>
+                    <div class="cake-stage">
+                        <div class="candles-row" id="candles-row"></div>
+                        <div class="cake-emoji">🎂</div>
+                    </div>
+                    <p class="hint-line">انفخي في الميكروفون — أو المسِ الشموع بإصبعك</p>
+                    <button class="mini-btn" id="candles-start">🎤 جاهزة؟ اضغطي ثم انفخي</button>
+                    <button class="btn btn-ghost" id="candles-relight" style="display:none">✦ أشعليها من جديد ✦</button>
+                </div>
+            </section>
+
+            <!-- TAB: MOMENTS -->
+            <section class="tab-panel" id="panel-moments" data-panel="moments" role="tabpanel">
+                <div class="card" id="wheel-card" style="text-align:center" data-sec="wheel">
+                    <span class="label">✦ عجلة الحظ ✦</span>
+                    <div class="wheel-wrap" style="position:relative;width:min(300px,90%);margin:0 auto">
+                        <div class="wheel-pointer">▼</div>
+                        <canvas id="wheel-canvas" width="300" height="300" style="width:100%;aspect-ratio:1;display:block;touch-action:none;cursor:grab;border-radius:50%"></canvas>
+                    </div>
+                    <p class="hint-line">اسحبي العجلة لتدويرها</p>
+                    <button class="btn btn-ghost" id="wheel-spin">✦ لفّيها ✦</button>
+                </div>
+
+                <div class="card" id="breath-card" style="text-align:center" data-sec="breath">
+                    <span class="label">✦ تنفّسي معي ✦</span>
+                    <div class="breath-wrap" id="breath-wrap">
+                        <svg class="breath-progress" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(176,138,92,0.20)" stroke-width="4"/>
+                            <circle id="breath-ring" cx="50" cy="50" r="46" fill="none" stroke="#b08a5c" stroke-width="4" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="289" transform="rotate(-90 50 50)"/>
+                        </svg>
+                        <div class="breath-circle" id="breath-circle">
+                            <span id="breath-text">استنشاق</span>
                         </div>
                     </div>
-                    <div class="rec-row" style="margin-top:12px">
-                        <button class="mini-btn" id="img-pick-btn">📷 أو أرسلي صورة</button>
-                        <input type="file" id="img-input" accept="image/*" style="display:none">
-                    </div>
-                    <p class="rec-status" id="upload-status"></p>
+                    <p class="hint-line">اضغطي باستمرار وتابعي الإيقاع — 3 دورات للفوز</p>
+                    <p id="breath-counter" style="font-size:0.85rem;color:var(--accent);margin-top:8px"></p>
                 </div>
-            </div>
+            </section>
+
+            <!-- TAB: GAMES -->
+            <section class="tab-panel" id="panel-games" data-panel="games" role="tabpanel">
+                <div class="card" id="slide-card" style="text-align:center">
+                    <span class="label">✦ بازل الصورة ✦</span>
+                    <div class="slide-board" id="slide-board"></div>
+                    <p class="hint-line" id="slide-hint" style="margin-top:12px">حركّي المربعات حتى تكتمل الصورة</p>
+                    <button class="btn btn-ghost" id="slide-reset">✦ خلط من جديد ✦</button>
+                </div>
+
+                <div class="card" id="memory-card" style="text-align:center">
+                    <span class="label">✦ لعبة الذاكرة ✦</span>
+                    <div class="memory-board" id="memory-board"></div>
+                    <p class="hint-line" id="memory-hint" style="margin-top:12px">طابقي الصور المتشابهة</p>
+                    <button class="btn btn-ghost" id="memory-reset">✦ لعبة جديدة ✦</button>
+                </div>
+
+                <div class="card" id="stars-card" style="text-align:center">
+                    <span class="label">✦ رسم النجوم ✦</span>
+                    <canvas id="stars-canvas" style="width:100%;max-width:340px"></canvas>
+                    <p class="hint-line">صلي النجوم بالترتيب: من كل نجمة مرقّمة إلى التي تليها</p>
+                    <button class="btn btn-ghost" id="stars-reset">✦ من جديد ✦</button>
+                </div>
+
+                <div class="card" id="draw-card" style="text-align:center" data-sec="draw">
+                    <span class="label">✦ ارسمي وخمّني ✦</span>
+                    <p class="hint-line">ارسمي شيئًا يخطر ببالكِ — ثم خمّني ماذا رأيتُ أنا فيه</p>
+                    <canvas id="draw-canvas" width="340" height="280" style="width:100%;max-width:340px;touch-action:none;cursor:crosshair;border-radius:12px;display:block;margin:0 auto"></canvas>
+                    <div class="draw-toolbar" style="display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:12px">
+                        <div class="draw-colors" style="display:flex;gap:6px;align-items:center">
+                            <button class="draw-color active" data-color="#2f2a24" style="background:#2f2a24" aria-label="أسود دافئ"></button>
+                            <button class="draw-color" data-color="#9a7b4f" style="background:#9a7b4f" aria-label="ذهبي"></button>
+                            <button class="draw-color" data-color="#b08a5c" style="background:#b08a5c" aria-label="شامبانيا"></button>
+                            <button class="draw-color" data-color="#c0392b" style="background:#c0392b" aria-label="أحمر"></button>
+                            <button class="draw-color" data-color="#7a9e8a" style="background:#7a9e8a" aria-label="أخضر"></button>
+                        </div>
+                        <span style="width:1px;height:22px;background:var(--border);display:inline-block"></span>
+                        <button class="mini-btn" id="draw-undo" title="تراجع">↩ تراجع</button>
+                        <button class="mini-btn" id="draw-clear">✕ امسحي</button>
+                    </div>
+                    <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap">
+                        <button class="btn btn-ghost" id="draw-guess">✦ خمّني ماذا أرى؟ ✦</button>
+                        <button class="mini-btn" id="draw-save">📷 أرسلي الرسم</button>
+                    </div>
+                    <p id="draw-guess-text" style="margin-top:12px;min-height:1.4em;color:var(--accent);font-size:1rem;line-height:1.9"></p>
+                    <p class="rec-status" id="draw-status"></p>
+                </div>
+            </section>
+
+            <!-- TAB: JOURNEY -->
+            <section class="tab-panel" id="panel-journey" data-panel="journey" role="tabpanel">
+                <div class="card card-focal" style="padding-bottom:22px" data-sec="boxes">
+                    <span class="label">🧩 صناديق الألغاز</span>
+                    <p style="color:var(--text-sub);font-size:0.95rem;margin-bottom:18px">كل يومٍ تُفتح صندوقةٌ جديدة... حلّي المفتوح ثم انتظري القادم ✨</p>
+                    <div id="boxes-grid"></div>
+
+                    <div id="box-detail" style="display:none">
+                        <div class="progress" id="box-progress"></div>
+                        <p id="box-question"></p>
+                        <div class="answer-row">
+                            <input type="text" id="box-answer" placeholder="اكتبي جوابك هنا..." autocomplete="off">
+                            <button class="btn" id="box-submit">تحقّقي</button>
+                        </div>
+                        <p class="wrong-msg" id="box-wrong" style="display:none">ليس هذا الجواب... فكّري مجددًا ✦</p>
+
+                        <div id="reward-view" style="display:none">
+                            <div class="reward-badge">✦ إجابةٌ صحيحة! ✦</div>
+                            <img id="reward-image" alt="" draggable="false" style="display:none">
+                            <p id="reward-text"></p>
+                            <p class="next-hint" id="next-hint"></p>
+                        </div>
+
+                        <div class="rec-zone" id="rec-zone" style="display:none">
+                            <div class="rec-divider">— ما عرفتي؟ اسأليني —</div>
+                            <button class="mini-btn" id="rec-start">🎤 سجّلي رسالة صوتية</button>
+                            <div id="rec-active" style="display:none">
+                                <div class="rec-row"><span class="rec-dot"></span><span class="rec-timer" id="rec-timer">0:00</span>
+                                <button class="mini-btn" id="rec-stop">■ إيقاف</button></div>
+                            </div>
+                            <div id="rec-review" style="display:none">
+                                <audio controls id="rec-player" class="rec-player"></audio>
+                                <div class="rec-row">
+                                    <button class="btn" id="rec-send" style="padding:11px 24px;font-size:0.78rem">✦ إرسالي الصوت</button>
+                                    <button class="mini-btn" id="rec-redo">↺ من جديد</button>
+                                </div>
+                            </div>
+                            <div class="rec-row" style="margin-top:12px">
+                                <button class="mini-btn" id="img-pick-btn">📷 أو أرسلي صورة</button>
+                                <input type="file" id="img-input" accept="image/*" style="display:none">
+                            </div>
+                            <p class="rec-status" id="upload-status"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
         </div>
-        </section>
 
         <footer class="site-footer">✦ صُنعت هذه الحديقة بحبٍّ — لكِ وحدكِ ✦</footer>
     </div>
@@ -283,6 +303,6 @@
     <button id="install-btn">✦ Install App</button>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=25" defer></script>
+    <script src="app.js?v=28" defer></script>
 </body>
 </html>

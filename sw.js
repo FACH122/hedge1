@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wonderland-doctor-v1';
+const CACHE_NAME = 'wonderland-doctor-v3';
 const APP_SHELL = [
     './',
     './index.html',
