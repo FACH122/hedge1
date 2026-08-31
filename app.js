@@ -134,7 +134,7 @@
             const a = Math.random() * 6.283, sp = Math.random() * 7 + 2;
             confetti.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 3,
                 s: Math.random() * 5 + 2, rot: Math.random() * 3.14, vr: (Math.random() - 0.5) * 0.25,
-                life: 1, hue: 320 + Math.random() * 30 });
+                life: 1, hue: 38 + Math.random() * 20 });
         }
     }
     addEventListener('pointermove', e => {
@@ -146,7 +146,7 @@
             p.tw += 0.02; p.x += p.vx; p.y += p.vy;
             if (p.y < -10) { p.y = H + 10; p.x = Math.random() * W; }
             fctx.globalAlpha = p.a * (0.6 + 0.4 * Math.sin(p.tw));
-            fctx.fillStyle = '#f48fbf';
+            fctx.fillStyle = '#d8c29a';
             fctx.beginPath(); fctx.arc(p.x, p.y, p.r, 0, 6.283); fctx.fill();
         }
         for (let i = sparks.length - 1; i >= 0; i--) {
@@ -365,7 +365,7 @@
         rc.width = rc.offsetWidth || 600; rc.height = rc.offsetHeight || 150;
         rcx.globalCompositeOperation = 'source-over';
         const g = rcx.createLinearGradient(0, 0, rc.width, rc.height);
-        g.addColorStop(0, '#f9cfe3'); g.addColorStop(0.5, '#e78ab5'); g.addColorStop(1, '#f9cfe3');
+        g.addColorStop(0, '#eadfc8'); g.addColorStop(0.5, '#b08a5c'); g.addColorStop(1, '#eadfc8');
         rcx.fillStyle = g; rcx.fillRect(0, 0, rc.width, rc.height);
         rcx.fillStyle = 'rgba(255,255,255,0.9)';
         rcx.font = Math.max(13, rc.width / 34) + 'px Montserrat, sans-serif';
@@ -647,17 +647,17 @@
     }
     function drawStars() {
         stx.clearRect(0, 0, stCanvas.width, stCanvas.height);
-        stx.strokeStyle = '#e64980'; stx.lineWidth = 2.5; stx.lineCap = 'round';
+        stx.strokeStyle = '#b08a5c'; stx.lineWidth = 2.5; stx.lineCap = 'round';
         for (let i = 0; i < starCurrent; i++) {
             const a = stars[i], b = stars[(i + 1) % stars.length];
             stx.beginPath(); stx.moveTo(a.x, a.y); stx.lineTo(b.x, b.y); stx.stroke();
         }
         if (starDrag !== null && starPos) {
-            stx.strokeStyle = 'rgba(230,73,128,0.4)';
+            stx.strokeStyle = 'rgba(176,138,92,0.4)';
             stx.beginPath(); stx.moveTo(stars[starDrag].x, stars[starDrag].y); stx.lineTo(starPos.x, starPos.y); stx.stroke();
         }
         stars.forEach((s, i) => {
-            stx.fillStyle = starDone ? '#c2255c' : (i <= starCurrent ? '#e64980' : '#ffb3cf');
+            stx.fillStyle = starDone ? '#9a7b4f' : (i <= starCurrent ? '#b08a5c' : '#e4d6bd');
             stx.beginPath(); stx.arc(s.x, s.y, i === starCurrent && !starDone ? 10 : 6.5, 0, 6.283); stx.fill();
             stx.fillStyle = '#fff'; stx.font = '9px Montserrat, sans-serif';
             stx.textAlign = 'center'; stx.textBaseline = 'middle';
@@ -773,7 +773,7 @@
     const wheelCanvas = document.getElementById('wheel-canvas');
     const wctx = wheelCanvas ? wheelCanvas.getContext('2d') : null;
     let wheelAngle = 0, wheelVel = 0, wheelSpinning = false, wheelDragging = false, wheelLastAngle = 0, wheelLastTime = 0;
-    const WHEEL_COLORS = ['#f783ac','#e64980','#ffb3cf','#c2255c','#f9c0d5','#d6336c','#fce7f1','#ff8fab'];
+    const WHEEL_COLORS = ['#d8c29a','#b08a5c','#9a7b4f','#c9a86f','#e4d6bd','#a9825a','#7d623a','#cbb486'];
     function drawWheel() {
         if (!wctx) return;
         const fortunes = intFortunes();
@@ -801,7 +801,7 @@
             wctx.restore();
         }
         wctx.fillStyle = '#fff'; wctx.beginPath(); wctx.arc(0,0,28,0,Math.PI*2); wctx.fill();
-        wctx.fillStyle = '#c2255c'; wctx.font = 'bold 16px serif'; wctx.textAlign='center'; wctx.textBaseline='middle';
+        wctx.fillStyle = '#9a7b4f'; wctx.font = 'bold 16px serif'; wctx.textAlign='center'; wctx.textBaseline='middle';
         wctx.fillText('✦',0,1);
         wctx.restore();
     }
@@ -881,7 +881,7 @@
     const breathCounter = document.getElementById('breath-counter');
     const breathCircle = document.getElementById('breath-circle');
     const BREATH_LABELS = ['استنشاق','حبس','زفير'];
-    const BREATH_COLORS = ['#e64980','#c2255c','#f783ac'];
+    const BREATH_COLORS = ['#b08a5c','#9a7b4f','#d8c29a'];
     function initBreath() {
         const vis = (interactions.visibility || {}).breath !== false;
         const card = document.getElementById('breath-card');
@@ -911,7 +911,7 @@
         }
         const scale = phase === 0 ? 0.85 + progress * 0.3 : phase === 1 ? 1.15 : 1.15 - progress * 0.3;
         breathCircle.style.transform = `scale(${scale})`;
-        breathCircle.style.background = phase === 1 ? 'linear-gradient(135deg,#c2255c,#a61e4d)' : 'var(--grad)';
+        breathCircle.style.background = phase === 1 ? 'linear-gradient(135deg,#9a7b4f,#7d623a)' : 'var(--grad)';
         const totalProgress = (elapsed % totalCycle) / totalCycle;
         const ringOffset = 289 * (1 - (breathCycle * 3 + phase + progress) / 9);
         // actually progress across 3 cycles: 3 cycles * 12s = 36s total
@@ -967,7 +967,7 @@
 
     const bCanvas = document.getElementById('balloon-canvas');
     const bcx = bCanvas.getContext('2d');
-    const BALLOON_COLORS = ['#f783ac', '#e64980', '#ffa8c5', '#c2255c', '#ff8fab', '#d6336c', '#f9c0d5'];
+    const BALLOON_COLORS = ['#d8c29a', '#b08a5c', '#e0cdab', '#9a7b4f', '#c9a86f', '#b08a5c', '#e4d6bd'];
     let balloons = [], bw = 0, bh = 260;
     function initBalloons() {
         const vis = (interactions.visibility || {}).balloons !== false;
@@ -992,7 +992,7 @@
         }
     }
     function drawBalloon(x, y, r, c) {
-        bcx.strokeStyle = 'rgba(125,84,104,0.35)';
+        bcx.strokeStyle = 'rgba(141,132,120,0.35)';
         bcx.beginPath();
         bcx.moveTo(x, y + r + 8);
         bcx.quadraticCurveTo(x + 7, y + r + 34, x, y + r + 60);

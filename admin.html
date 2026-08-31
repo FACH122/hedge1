@@ -6,63 +6,63 @@
     <title>✦ لوحة التحكم</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-        body { background: #fdf2f7; color: #44263b; min-height: 100vh; padding: 24px 14px 60px; }
-        h1 { text-align: center; font-size: 1.25rem; margin-bottom: 20px; color: #c2255c; }
-        .gate { max-width: 340px; margin: 14vh auto 0; background: #fff; border: 1px solid #f3d3e1;
-            border-radius: 16px; padding: 36px 26px; text-align: center; box-shadow: 0 10px 30px rgba(214,51,108,.08); }
+        body { background: #f5f1e8; color: #2f2a24; min-height: 100vh; padding: 24px 14px 60px; }
+        h1 { text-align: center; font-size: 1.25rem; margin-bottom: 20px; color: #9a7b4f; }
+        .gate { max-width: 340px; margin: 14vh auto 0; background: #fff; border: 1px solid #e2d7c4;
+            border-radius: 16px; padding: 36px 26px; text-align: center; box-shadow: 0 10px 30px rgba(176,138,92,.08); }
         .gate input { width: 100%; padding: 13px; border-radius: 10px; margin-bottom: 12px;
-            border: 1px solid #f3d3e1; font-size: 1rem; outline: none; text-align: center; }
-        .gate input:focus { border-color: #e64980; }
+            border: 1px solid #e2d7c4; font-size: 1rem; outline: none; text-align: center; }
+        .gate input:focus { border-color: #b08a5c; }
         .btn-main { width: 100%; padding: 13px; border: none; border-radius: 10px; cursor: pointer;
-            background: linear-gradient(135deg,#f783ac,#c2255c); color: #fff; font-weight: 700; font-size: 1rem; }
+            background: linear-gradient(135deg,#d8c29a,#9a7b4f); color: #fff; font-weight: 700; font-size: 1rem; }
         .wrap { max-width: 780px; margin: 0 auto; }
         .tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 22px; flex-wrap: wrap; }
         .tab-btn { padding: 10px 20px; border-radius: 24px; cursor: pointer; font-size: 0.9rem;
-            background: #fff; border: 1px solid #f3d3e1; color: #7d5468; }
-        .tab-btn.active { background: linear-gradient(135deg,#f783ac,#c2255c); color: #fff; border-color: transparent; font-weight: 700; }
+            background: #fff; border: 1px solid #e2d7c4; color: #8d8478; }
+        .tab-btn.active { background: linear-gradient(135deg,#d8c29a,#9a7b4f); color: #fff; border-color: transparent; font-weight: 700; }
         .toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; justify-content: center; align-items: center; }
-        .tbtn { background: #fff; border: 1px solid #f3d3e1; color: #c2255c;
+        .tbtn { background: #fff; border: 1px solid #e2d7c4; color: #9a7b4f;
             padding: 9px 18px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; }
-        .tbtn:hover { background: #fff0f6; }
-        .card { background: #fff; border: 1px solid #f3d3e1; border-radius: 14px;
+        .tbtn:hover { background: #faf6ef; }
+        .card { background: #fff; border: 1px solid #e2d7c4; border-radius: 14px;
             padding: 18px; margin-bottom: 14px; direction: rtl; }
-        .card label { display: block; font-size: 0.78rem; font-weight: 700; color: #c2255c; margin: 12px 0 5px; }
+        .card label { display: block; font-size: 0.78rem; font-weight: 700; color: #9a7b4f; margin: 12px 0 5px; }
         .card textarea, .card input[type=text], .card input[type=number] {
-            width: 100%; border: 1px solid #f3d3e1; border-radius: 9px;
-            padding: 10px; font-family: inherit; font-size: 0.95rem; outline: none; color: #44263b; background: #fffbfd;
+            width: 100%; border: 1px solid #e2d7c4; border-radius: 9px;
+            padding: 10px; font-family: inherit; font-size: 0.95rem; outline: none; color: #2f2a24; background: #fbf9f2;
         }
-        .card textarea:focus, .card input:focus { border-color: #e64980; }
+        .card textarea:focus, .card input:focus { border-color: #b08a5c; }
         .card textarea { resize: vertical; min-height: 50px; }
         .num-row { display: flex; gap: 12px; align-items: center; margin-bottom: 4px; }
-        .num-badge { background: #ffe9f3; color: #c2255c; font-weight: 700; border-radius: 50%;
+        .num-badge { background: #f5f1e8; color: #9a7b4f; font-weight: 700; border-radius: 50%;
             width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; align-items: center; }
-        .save { background: linear-gradient(135deg,#f783ac,#c2255c); color: #fff; border: none;
+        .save { background: linear-gradient(135deg,#d8c29a,#9a7b4f); color: #fff; border: none;
             padding: 10px 24px; border-radius: 20px; cursor: pointer; font-weight: 700; font-size: 0.85rem; }
-        .del { background: #fff; border: 1px solid #ffc9c9; color: #e03131;
+        .del { background: #fff; border: 1px solid #e2d7c4; color: #b6493e;
             padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; }
         .status { font-size: 0.82rem; min-height: 1.2em; margin-top: 8px; }
-        .status.ok { color: #2b8a3e; } .status.err { color: #e03131; }
+        .status.ok { color: #2b8a3e; } .status.err { color: #b6493e; }
         .rimg { max-width: 170px; max-height: 120px; border-radius: 10px; margin-top: 8px;
-            border: 1px solid #f3d3e1; display: block; }
-        .big-ta { width: 100%; min-height: 170px; border: 1px solid #f3d3e1; border-radius: 12px;
+            border: 1px solid #e2d7c4; display: block; }
+        .big-ta { width: 100%; min-height: 170px; border: 1px solid #e2d7c4; border-radius: 12px;
             padding: 14px; font-family: inherit; font-size: 1rem; line-height: 2; resize: vertical;
-            outline: none; direction: rtl; color: #44263b; background: #fffbfd; }
-        .hint { color: #7d5468; font-size: 0.8rem; margin: 6px 0 18px; line-height: 1.9; }
-        .lbl { font-size: 0.88rem; font-weight: 700; color: #c2255c; display: block; margin: 18px 0 6px; }
-        .voice-item { background: #fff; border: 1px solid #f3d3e1; border-radius: 12px;
+            outline: none; direction: rtl; color: #2f2a24; background: #fbf9f2; }
+        .hint { color: #8d8478; font-size: 0.8rem; margin: 6px 0 18px; line-height: 1.9; }
+        .lbl { font-size: 0.88rem; font-weight: 700; color: #9a7b4f; display: block; margin: 18px 0 6px; }
+        .voice-item { background: #fff; border: 1px solid #e2d7c4; border-radius: 12px;
             padding: 14px; margin-bottom: 10px; direction: rtl; }
         .voice-meta { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;
             font-size: 0.85rem; margin-bottom: 8px; }
-        .voice-meta b { color: #c2255c; }
+        .voice-meta b { color: #9a7b4f; }
         audio { width: 100%; height: 38px; }
-        .empty { text-align: center; color: #7d5468; padding: 40px 0; line-height: 2; }
-        .loading { text-align: center; color: #c2255c; padding: 30px; font-weight: 700; }
-        #img-grid img { width: 110px; height: 110px; object-fit: cover; border-radius: 10px; border: 1px solid #f3d3e1; }
+        .empty { text-align: center; color: #8d8478; padding: 40px 0; line-height: 2; }
+        .loading { text-align: center; color: #9a7b4f; padding: 30px; font-weight: 700; }
+        #img-grid img { width: 110px; height: 110px; object-fit: cover; border-radius: 10px; border: 1px solid #e2d7c4; }
     </style>
 </head>
 <body>
-    <div id="err-banner" style="display:none;position:fixed;top:0;left:0;right:0;background:#e03131;color:#fff;padding:8px 14px;font-size:13px;z-index:9999;text-align:center"></div>
+    <div id="err-banner" style="display:none;position:fixed;top:0;left:0;right:0;background:#b6493e;color:#fff;padding:8px 14px;font-size:13px;z-index:9999;text-align:center"></div>
     <div class="gate" id="gate">
         <h1>✦ لوحة التحكم</h1>
         <input type="email" id="email" placeholder="البريد الإلكتروني" autocomplete="username">
@@ -71,7 +71,7 @@
     </div>
 
     <div class="wrap" id="app" style="display:none">
-        <h1>✦ إدارة الحديقة ✦ <small style="color:#c2255c;font-size:0.7rem">v3.2</small></h1>
+        <h1>✦ إدارة الحديقة ✦ <small style="color:#9a7b4f;font-size:0.7rem">v3.2</small></h1>
         <div class="tabs">
             <button class="tab-btn active" data-t="puzzles" onclick="showTab('puzzles')">🧩 الألغاز</button>
             <button class="tab-btn" data-t="texts" onclick="showTab('texts')">💬 النصوص</button>
@@ -85,7 +85,7 @@
             <div class="toolbar">
                 <button class="tbtn" onclick="newPuzzle()">➕ لغز جديد</button>
                 <button class="tbtn" onclick="loadAll().then(renderPuzzleList)">↺ تحديث</button>
-                <span style="color:#7d5468;font-size:0.82rem">📅 حدّدي يوم فتح كل صندوق — يُفتح تلقائياً في يومه</span>
+                <span style="color:#8d8478;font-size:0.82rem">📅 حدّدي يوم فتح كل صندوق — يُفتح تلقائياً في يومه</span>
             </div>
             <div id="plist"><div class="loading">...جاري التحميل</div></div>
         </div>
@@ -163,7 +163,7 @@
             <textarea class="big-ta" id="ta-stars"></textarea>
 
             <label class="lbl">🎂 عنوان الشموع</label>
-            <input type="text" id="ta-candles-title" style="width:100%;border:1px solid #f3d3e1;border-radius:9px;padding:10px;font-family:inherit;font-size:0.95rem;outline:none;color:#44263b;background:#fffbfd">
+            <input type="text" id="ta-candles-title" style="width:100%;border:1px solid #e2d7c4;border-radius:9px;padding:10px;font-family:inherit;font-size:0.95rem;outline:none;color:#2f2a24;background:#fbf9f2">
 
             <label class="lbl">🎂 رسالة الشموع (بعد إطفائها كلها)</label>
             <textarea class="big-ta" id="ta-candles"></textarea>
@@ -205,7 +205,7 @@
 
         <div id="tab-voices" style="display:none">
             <div class="toolbar">
-                <span class="tbtn" id="vcount" style="cursor:default;border:none;background:none;color:#7d5468"></span>
+                <span class="tbtn" id="vcount" style="cursor:default;border:none;background:none;color:#8d8478"></span>
                 <button class="tbtn" onclick="loadVoices()">↺ تحديث</button>
             </div>
             <label class="lbl">📷 صورها المرسلة</label>
@@ -301,7 +301,7 @@ async function loadAll() {
             if (err.code === '42P01' || r.status === 404) {
                 DB_OK = false;
                 document.getElementById('plist').innerHTML =
-                    '<div class="empty" style="color:#e03131">⚠️ جدول content غير موجود!<br><br>شغّلي أمر SQL الذي أرسله لك في Supabase ثم اضغطي «↺ تحديث»</div>';
+                    '<div class="empty" style="color:#b6493e">⚠️ جدول content غير موجود!<br><br>شغّلي أمر SQL الذي أرسله لك في Supabase ثم اضغطي «↺ تحديث»</div>';
                 return;
             }
             throw new Error(err.message || r.status);
@@ -371,7 +371,7 @@ function renderPuzzleList() {
             <div class="num-row">
                 <div class="num-badge">${i+1}</div>
                 <label style="margin:0;flex:1;text-align:left">📅 يوم الفتح:
-                    <input type="date" class="f-unlock" value="${esc(p.unlock||'')}" style="border:1px solid #f3d3e1;border-radius:8px;padding:6px 10px;color:#44263b;margin-inline-start:6px">
+                    <input type="date" class="f-unlock" value="${esc(p.unlock||'')}" style="border:1px solid #e2d7c4;border-radius:8px;padding:6px 10px;color:#2f2a24;margin-inline-start:6px">
                 </label>
             </div>
             <label>❓ السؤال</label>
@@ -421,8 +421,8 @@ function renderImgs(card) {
     try { imgs = JSON.parse(card.querySelector('.f-imgs').value || '[]'); } catch (_) {}
     row.innerHTML = imgs.map(u => `
         <div class="img-thumb" style="position:relative">
-            <img src="${esc(u)}" style="width:90px;height:70px;object-fit:cover;border-radius:8px;border:1px solid #f3d3e1;display:block">
-            <button type="button" class="img-del" onclick="delImage(this)" style="position:absolute;top:-7px;inset-inline-end:-7px;background:#e03131;color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:12px;line-height:1">✕</button>
+            <img src="${esc(u)}" style="width:90px;height:70px;object-fit:cover;border-radius:8px;border:1px solid #e2d7c4;display:block">
+            <button type="button" class="img-del" onclick="delImage(this)" style="position:absolute;top:-7px;inset-inline-end:-7px;background:#b6493e;color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:12px;line-height:1">✕</button>
         </div>`).join('');
 }
 
@@ -526,8 +526,8 @@ async function saveTexts() {
 function renderSlidePreview() {
     const row = document.getElementById('slide-img-row');
     row.innerHTML = INT_RAW.slideImage
-        ? `<img src="${esc(INT_RAW.slideImage)}" style="width:90px;height:70px;object-fit:cover;border-radius:8px;border:1px solid #f3d3e1">`
-        : '<span style="color:#7d5468;font-size:0.85rem;align-self:center">لا صورة بعد</span>';
+        ? `<img src="${esc(INT_RAW.slideImage)}" style="width:90px;height:70px;object-fit:cover;border-radius:8px;border:1px solid #e2d7c4">`
+        : '<span style="color:#8d8478;font-size:0.85rem;align-self:center">لا صورة بعد</span>';
 }
 
 function pickSlideImage(btn) {
@@ -571,8 +571,8 @@ function renderMemoryPreview() {
     const row = document.getElementById('memory-img-row');
     const imgs = INT_RAW.memoryImages || [];
     row.innerHTML = imgs.length
-        ? imgs.map(u => `<img src="${esc(u)}" style="width:90px;height:70px;object-fit:cover;border-radius:8px;border:1px solid #f3d3e1">`).join('')
-        : '<span style="color:#7d5468;font-size:0.85rem;align-self:center">لا صور بعد</span>';
+        ? imgs.map(u => `<img src="${esc(u)}" style="width:90px;height:70px;object-fit:cover;border-radius:8px;border:1px solid #e2d7c4">`).join('')
+        : '<span style="color:#8d8478;font-size:0.85rem;align-self:center">لا صور بعد</span>';
 }
 
 function pickMemoryImage(btn) {
@@ -620,7 +620,7 @@ function renderSongPreview() {
     const el = document.getElementById('song-preview');
     el.innerHTML = INT_RAW.songUrl
         ? `<audio controls src="${esc(INT_RAW.songUrl)}" style="width:100%;max-width:320px"></audio>`
-        : '<span style="color:#7d5468;font-size:0.85rem">لا أغنية بعد — زر ♪ يشغّل الموسيقى الهادئة العادية</span>';
+        : '<span style="color:#8d8478;font-size:0.85rem">لا أغنية بعد — زر ♪ يشغّل الموسيقى الهادئة العادية</span>';
 }
 
 function pickSong(btn) {
@@ -807,7 +807,7 @@ async function loadStats(more=false) {
         _allStatsRows = _allStatsRows.concat(rows);
         body.innerHTML = renderStats(_allStatsRows, rows.length === _statsPageSize);
     } catch (e) {
-        body.innerHTML = `<div class="empty" style="color:#e03131">⚠️ ${esc(e.message)}<br><br>إذا ظهرت رسالة "relation does not exist" شغّلي أمر SQL المحدث (supabase-setup.sql) أولاً</div>`;
+        body.innerHTML = `<div class="empty" style="color:#b6493e">⚠️ ${esc(e.message)}<br><br>إذا ظهرت رسالة "relation does not exist" شغّلي أمر SQL المحدث (supabase-setup.sql) أولاً</div>`;
     }
 }
 function loadMoreStats(){
@@ -816,7 +816,7 @@ function loadMoreStats(){
 }
 
 function renderStats(rows, hasMore) {
-    const totalNote = hasMore ? `<div class="hint" style="text-align:center">عرض ${_allStatsRows.length.toLocaleString('ar-DZ')} سجل — يوجد المزيد. <a href="#" onclick="loadMoreStats();return false" style="color:#c2255c">تحميل المزيد ↓</a></div>` : '';
+    const totalNote = hasMore ? `<div class="hint" style="text-align:center">عرض ${_allStatsRows.length.toLocaleString('ar-DZ')} سجل — يوجد المزيد. <a href="#" onclick="loadMoreStats();return false" style="color:#9a7b4f">تحميل المزيد ↓</a></div>` : '';
     const avg = a => a.length ? Math.round(a.reduce((x, y) => x + y, 0) / a.length) : 0;
     const mins = ms => (ms / 60000).toFixed(1);
     const n = v => (v || 0).toLocaleString('ar-DZ');
@@ -862,13 +862,13 @@ function renderStats(rows, hasMore) {
 
     html += `<div class="card"><label style="margin-top:0">📋 لكل قسم — الوقت، الاكتشاف، النقرات، التردد</label>
         <table style="width:100%;border-collapse:collapse;font-size:0.85rem;text-align:center">
-        <tr style="color:#c2255c"><th style="padding:6px">القسم</th><th>رأته</th><th>اكتشفت خلال</th><th>الوقت</th><th>نقرات</th><th>مزدوجة</th><th>متكررة</th><th>ترددت قبل أول نقرة</th></tr>`;
+        <tr style="color:#9a7b4f"><th style="padding:6px">القسم</th><th>رأته</th><th>اكتشفت خلال</th><th>الوقت</th><th>نقرات</th><th>مزدوجة</th><th>متكررة</th><th>ترددت قبل أول نقرة</th></tr>`;
     for (const s of allSecs) {
         const disc = secDisc[s] || 0;
         const t = secTime[s] || 0;
         const cl = secClicks[s] || 0;
         const hes = secHes[s] ? avg(secHes[s]) : null;
-        html += `<tr style="border-top:1px solid #f3d3e1">
+        html += `<tr style="border-top:1px solid #e2d7c4">
             <td style="padding:6px;text-align:right">${SEC_NAMES[s]}</td>
             <td>${disc ? n(disc) + '×' : '—'}</td>
             <td>${discMs[s] ? (avg(discMs[s]) / 1000).toFixed(1) + ' ث' : '—'}</td>
@@ -890,10 +890,10 @@ function renderStats(rows, hasMore) {
     if (answers.length) {
         html += `<div class="card"><label style="margin-top:0">✍️ أجوبتها في الألغاز</label>
         <table style="width:100%;border-collapse:collapse;font-size:0.85rem;text-align:center">
-        <tr style="color:#c2255c"><th style="padding:6px">التوقيت</th><th>اللغز</th><th>جوابها</th><th>النتيجة</th><th>فكّرت مدة</th></tr>`;
+        <tr style="color:#9a7b4f"><th style="padding:6px">التوقيت</th><th>اللغز</th><th>جوابها</th><th>النتيجة</th><th>فكّرت مدة</th></tr>`;
         for (const a of answers) {
             const d = a.detail || {};
-            html += `<tr style="border-top:1px solid #f3d3e1">
+            html += `<tr style="border-top:1px solid #e2d7c4">
                 <td style="padding:6px">${new Date(a.created_at).toLocaleString('ar-DZ')}</td>
                 <td>${esc(String(d.qid || '').slice(0, 8))}</td>
                 <td style="text-align:right">${esc(d.text || '')}</td>
@@ -910,11 +910,11 @@ function renderStats(rows, hasMore) {
         html += `<div class="card"><label style="margin-top:0">⌨️ أثناء الكتابة (${typings.length.toLocaleString('ar-DZ')} لقطة${typings.length>300?' — عرض 300 الأخيرة':''})</label>
         <div style="max-height:420px;overflow-y:auto">
         <table style="width:100%;border-collapse:collapse;font-size:0.85rem;text-align:center">
-        <tr style="color:#c2255c"><th style="padding:6px">التوقيت</th><th>المكان</th><th>ما كتبته</th></tr>`;
+        <tr style="color:#9a7b4f"><th style="padding:6px">التوقيت</th><th>المكان</th><th>ما كتبته</th></tr>`;
         for (const t of typings.slice(0,300)) {
             const d = t.detail || {};
             const place = t.section === 'rename' ? '✏️ الاسم' : '🧩 لغز ' + esc(String(d.qid || '').slice(0, 8));
-            html += `<tr style="border-top:1px solid #f3d3e1">
+            html += `<tr style="border-top:1px solid #e2d7c4">
                 <td style="padding:6px">${new Date(t.created_at).toLocaleString('ar-DZ')}</td>
                 <td>${place}</td>
                 <td style="text-align:right">${esc(d.text || '')}</td>
@@ -926,14 +926,14 @@ function renderStats(rows, hasMore) {
     const renames = rows.filter(r => r.name === 'rename');
     if (renames.length) {
         html += `<div class="card"><label style="margin-top:0">✏️ تغييرات الاسم</label><p style="font-size:0.95rem;line-height:2">` +
-            renames.map(r => `${esc((r.detail || {}).text || '')} <small style="color:#7d5468">(${new Date(r.created_at).toLocaleString('ar-DZ')})</small>`).join(' · ') +
+            renames.map(r => `${esc((r.detail || {}).text || '')} <small style="color:#8d8478">(${new Date(r.created_at).toLocaleString('ar-DZ')})</small>`).join(' · ') +
             `</p></div>`;
     }
 
     html += `<div class="card"><label style="margin-top:0">🕰️ السجل الكامل (زمني — ${rows.length.toLocaleString('ar-DZ')} حدث)</label>
         <div style="max-height:500px;overflow-y:auto">
         <table style="width:100%;border-collapse:collapse;font-size:0.82rem;text-align:center">
-        <tr style="color:#c2255c;position:sticky;top:0;background:#fff"><th style="padding:6px">التوقيت</th><th>الحدث</th><th>القسم</th><th>التفاصيل</th></tr>`;
+        <tr style="color:#9a7b4f;position:sticky;top:0;background:#fff"><th style="padding:6px">التوقيت</th><th>الحدث</th><th>القسم</th><th>التفاصيل</th></tr>`;
     for (const r of rows.slice(0, 1000)) {
         const d = r.detail || {};
         let det = '';
@@ -945,7 +945,7 @@ function renderStats(rows, hasMore) {
         else if (d.pct) det = d.pct+'%';
         else if (d.ms) det = (d.ms/1000).toFixed(1)+'ث';
         else det = JSON.stringify(d);
-        html += `<tr style="border-top:1px solid #f3d3e1">
+        html += `<tr style="border-top:1px solid #e2d7c4">
             <td style="padding:4px 6px">${new Date(r.created_at).toLocaleString('ar-DZ')}</td>
             <td>${esc(r.name)}</td>
             <td>${esc(r.section||'—')}</td>
@@ -992,7 +992,7 @@ async function loadVoices() {
             `<a href="${urls[f.name]}" target="_blank">
                 <img src="${urls[f.name]}">
              </a>`).join('')
-            : '<span style="color:#7d5468;font-size:0.85rem">لا صور بعد</span>';
+            : '<span style="color:#8d8478;font-size:0.85rem">لا صور بعد</span>';
         document.getElementById('vcount').textContent = files.length + ' تسجيل';
         if (!files.length) { el.innerHTML = '<div class="empty">لا رسائل صوتية بعد 🎙️</div>'; return; }
         el.innerHTML = files.map(f => {
@@ -1001,7 +1001,7 @@ async function loadVoices() {
             const label = info ? `<b>${esc(info.who)}</b> — بعد اللغز رقم ${info.n}` : esc(f.name);
             const when = info ? info.ts.toLocaleString('ar-DZ') : '';
             return `<div class="voice-item">
-                <div class="voice-meta"><span>${label}</span><span>${when} · <a href="${url}" target="_blank" style="color:#c2255c">تحميل ⬇</a></span></div>
+                <div class="voice-meta"><span>${label}</span><span>${when} · <a href="${url}" target="_blank" style="color:#9a7b4f">تحميل ⬇</a></span></div>
                 <audio controls preload="none" src="${url}"></audio>
             </div>`;
         }).join('');
