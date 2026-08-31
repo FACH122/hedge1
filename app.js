@@ -795,6 +795,14 @@
             }catch(e){ st.textContent='تعذّر الإرسال: '+(e.message||'خطأ'); }
             finally{ $id('draw-save').disabled=false; }
         });
+        // fullscreen toggle — draw directly on the screen
+        $id('draw-expand')?.addEventListener('click', ()=>{
+            const card = $id('draw-card');
+            const on = card.classList.toggle('draw-fullscreen');
+            $id('draw-expand').textContent = on ? '✕ إغلاق' : '⛶ ملء الشاشة';
+            if(on) card.scrollIntoView({behavior:'smooth', block:'start'});
+            requestAnimationFrame(()=> setTimeout(resizeDraw, 80));
+        });
         // expose for tab switch resize
         window._resizeDraw = resizeDraw;
         // init
@@ -803,6 +811,9 @@
         // observe tab visibility
         const obs = new MutationObserver(()=>{ if(cvs.offsetParent) resizeDraw(); });
         const panel = $id('panel-games'); if(panel) obs.observe(panel, {attributes:true, attributeFilter:['class']});
+        // also observe fullscreen class
+        const cardObs = new MutationObserver(()=>{ if($id('draw-card').classList.contains('draw-fullscreen')) resizeDraw(); });
+        cardObs.observe($id('draw-card'), {attributes:true, attributeFilter:['class']});
     })();
 
     // BLOW THE CANDLES
