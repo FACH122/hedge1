@@ -18,7 +18,8 @@ create table if not exists public.content (
 insert into public.content (key, value) values
     ('puzzles', '[]'::jsonb),
     ('texts', '{}'::jsonb),
-    ('poem', '[]'::jsonb)
+    ('poem', '[]'::jsonb),
+    ('gallery', '[]'::jsonb)
 on conflict (key) do nothing;
 
 alter table public.content enable row level security;

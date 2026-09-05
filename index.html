@@ -18,7 +18,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="styles.css?v=30">
+    <link rel="stylesheet" href="styles.css?v=31">
 </head>
 <body>
 
@@ -49,6 +49,7 @@
             <button class="tab-btn" data-tab="moments" role="tab" aria-selected="false">لحظاتنا</button>
             <button class="tab-btn" data-tab="games" role="tab" aria-selected="false">ألعاب</button>
             <button class="tab-btn" data-tab="journey" role="tab" aria-selected="false">رحلتنا</button>
+            <button class="tab-btn" data-tab="gallery" role="tab" aria-selected="false">المعرض</button>
         </nav>
 
         <div class="tab-panels" id="tab-panels">
@@ -235,6 +236,17 @@
                 </div>
             </section>
 
+            <!-- TAB: GALLERY -->
+            <section class="tab-panel" id="panel-gallery" data-panel="gallery" role="tabpanel">
+                <div class="card card-focal" style="padding-bottom:22px" data-sec="gallery" id="gallery-card">
+                    <span class="label">🖼️ معرض</span>
+                    <p style="color:var(--text-sub);font-size:0.95rem;margin-bottom:18px">لوحات اخترتُها لكِ… المسِي أي عملٍ لترينه بحجمه الكامل ✨</p>
+                    <div id="gallery-feature" style="display:none"></div>
+                    <div id="gallery-grid"></div>
+                    <div class="empty-note" id="gallery-empty">🎨 المعرض يُجهَّز الآن… عودي قريبًا يا حبيبتي</div>
+                </div>
+            </section>
+
         </div>
 
         <footer class="site-footer">✦ صُنعت هذه الحديقة بحبٍّ — لكِ وحدكِ ✦</footer>
@@ -301,11 +313,17 @@
     </div>
 
     <div id="toast"></div>
-    <div id="reward-fullscreen"><img id="reward-fs-img" alt="" draggable="false"></div>
+    <div id="reward-fullscreen"><img id="reward-fs-img" alt="" draggable="false">
+        <div id="reward-fs-cap" style="display:none"></div>
+        <div id="reward-fs-count" style="display:none"></div>
+        <button id="reward-fs-prev" style="display:none" aria-label="السابق">‹</button>
+        <button id="reward-fs-next" style="display:none" aria-label="التالي">›</button>
+        <button id="reward-fs-close" style="display:none" aria-label="إغلاق">✕</button>
+    </div>
     <button class="music-btn" id="music-btn" title="الموسيقى">♪</button>
     <button id="install-btn">✦ Install App</button>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=30" defer></script>
+    <script src="app.js?v=31" defer></script>
 </body>
 </html>

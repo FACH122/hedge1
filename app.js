@@ -435,6 +435,8 @@
         const fs = $id('reward-fullscreen');
         (fs._timers || []).forEach(clearTimeout);
         fs._timers = [];
+        galleryOpenIdx = -1;
+        galleryNavUI(false);
         $id('reward-fs-img').src = src;
         fs.classList.add('active');
         requestAnimationFrame(() => requestAnimationFrame(() => fs.classList.add('show')));
@@ -452,6 +454,107 @@
         initMemory();
         initStars();
         initCandles();
+        renderGallery();
+    }
+
+    // ================= ART GALLERY =================
+    let galleryData = [];
+    let galleryOpenIdx = -1;
+    function renderGallery() {
+        const card = $id('gallery-card');
+        if (!card) return;
+        const vis = (interactions.visibility || {}).gallery !== false;
+        const btn = document.querySelector('#tab-bar [data-tab="gallery"]');
+        const panel = $id('panel-gallery');
+        if (btn) btn.style.display = vis ? '' : 'none';
+        if (!vis) {
+            if (panel && panel.classList.contains('active') && window.switchTab) window.switchTab('word');
+            return;
+        }
+        const feat = $id('gallery-feature'), grid = $id('gallery-grid'), empty = $id('gallery-empty');
+        if (!galleryData.length) {
+            feat.style.display = 'none'; grid.innerHTML = '';
+            empty.style.display = '';
+            return;
+        }
+        empty.style.display = 'none';
+        const f = galleryData[0];
+        feat.style.display = '';
+        feat.innerHTML = `<div class="gallery-frame" data-i="0">
+                <img src="${esc(f.url)}" alt="${esc(f.title || 'لوحة')}" decoding="async" draggable="false">
+            </div>
+            <div class="gallery-cap">${f.title ? `<div class="g-t">${esc(f.title)}</div>` : ''}${f.caption ? `<div class="g-c">${esc(f.caption)}</div>` : ''}</div>`;
+        grid.innerHTML = galleryData.slice(1).map((g, k) => {
+            const i = k + 1;
+            return `<div class="g-item" data-i="${i}">
+                <img src="${esc(g.url)}" alt="${esc(g.title || ('لوحة ' + (i + 1)))}" loading="lazy" decoding="async" draggable="false">
+                ${g.title ? `<div class="g-t">${esc(g.title)}</div>` : ''}
+            </div>`;
+        }).join('');
+        feat.querySelector('.gallery-frame').addEventListener('click', () => openGallery(0));
+        grid.querySelectorAll('.g-item').forEach(el =>
+            el.addEventListener('click', () => openGallery(+el.dataset.i)));
+    }
+    function galleryNavUI(on) {
+        const fs = $id('reward-fullscreen');
+        if (!fs) return;
+        fs.classList.toggle('nav-on', on);
+        ['reward-fs-cap', 'reward-fs-count', 'reward-fs-prev', 'reward-fs-next', 'reward-fs-close']
+            .forEach(id => { const el = $id(id); if (el) el.style.display = on ? '' : 'none'; });
+    }
+    function paintGallery() {
+        const g = galleryData[galleryOpenIdx];
+        if (!g) return;
+        $id('reward-fs-img').src = g.url;
+        $id('reward-fs-cap').innerHTML =
+            (g.title ? `<span class="g-t">${esc(g.title)}</span>` : '') + (g.caption ? esc(g.caption) : '');
+        $id('reward-fs-count').textContent = (galleryOpenIdx + 1) + ' / ' + galleryData.length;
+    }
+    function openGallery(i) {
+        if (!galleryData.length) return;
+        galleryOpenIdx = ((i % galleryData.length) + galleryData.length) % galleryData.length;
+        const fs = $id('reward-fullscreen');
+        (fs._timers || []).forEach(clearTimeout);
+        fs._timers = [];
+        galleryNavUI(true);
+        paintGallery();
+        fs.classList.add('active');
+        requestAnimationFrame(() => requestAnimationFrame(() => fs.classList.add('show')));
+        playChime();
+        try { trackEvent('gallery_open', 'gallery', { i: galleryOpenIdx }); } catch (_) {}
+    }
+    function closeGallery() {
+        galleryOpenIdx = -1;
+        const fs = $id('reward-fullscreen');
+        fs.classList.remove('show');
+        setTimeout(() => { fs.classList.remove('active'); galleryNavUI(false); }, 600);
+    }
+    function stepGallery(d) {
+        if (galleryOpenIdx < 0) return;
+        openGallery(galleryOpenIdx + d);
+    }
+    if (!window._galKeys) {
+        window._galKeys = true;
+        document.addEventListener('keydown', e => {
+            if (galleryOpenIdx < 0) return;
+            if (e.key === 'Escape') closeGallery();
+            else if (e.key === 'ArrowLeft') stepGallery(-1);
+            else if (e.key === 'ArrowRight') stepGallery(1);
+        });
+        const fsEl = $id('reward-fullscreen');
+        let _gx = null;
+        fsEl.addEventListener('touchstart', e => { _gx = e.touches[0].clientX; }, { passive: true });
+        fsEl.addEventListener('touchend', e => {
+            if (_gx === null || galleryOpenIdx < 0) return;
+            const dx = e.changedTouches[0].clientX - _gx; _gx = null;
+            if (Math.abs(dx) > 40) stepGallery(dx < 0 ? 1 : -1);
+        }, { passive: true });
+        fsEl.addEventListener('click', e => {
+            if (galleryOpenIdx >= 0 && e.target === fsEl) closeGallery();
+        });
+        $id('reward-fs-prev').addEventListener('click', e => { e.stopPropagation(); stepGallery(-1); });
+        $id('reward-fs-next').addEventListener('click', e => { e.stopPropagation(); stepGallery(1); });
+        $id('reward-fs-close').addEventListener('click', e => { e.stopPropagation(); closeGallery(); });
     }
 
     // HEART
@@ -1536,6 +1639,15 @@
                     poemData = row.value;
                 } else if (row.key === 'interactions' && row.value) {
                     interactions = row.value;
+                } else if (row.key === 'gallery' && Array.isArray(row.value)) {
+                    galleryData = row.value
+                        .filter(g => g && g.url && String(g.url).trim())
+                        .map((g, i) => ({
+                            id: g.id || ('g' + i),
+                            url: String(g.url).trim(),
+                            title: g.title || '',
+                            caption: g.caption || ''
+                        }));
                 }
             });
             loadFailedShown = false;

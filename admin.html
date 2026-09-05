@@ -71,12 +71,13 @@
     </div>
 
     <div class="wrap" id="app" style="display:none">
-        <h1>✦ إدارة الحديقة ✦ <small style="color:#9a7b4f;font-size:0.7rem">v3.2</small></h1>
+        <h1>✦ إدارة الحديقة ✦ <small style="color:#9a7b4f;font-size:0.7rem">v3.3</small></h1>
         <div class="tabs">
             <button class="tab-btn active" data-t="puzzles" onclick="showTab('puzzles')">🧩 الألغاز</button>
             <button class="tab-btn" data-t="texts" onclick="showTab('texts')">💬 النصوص</button>
             <button class="tab-btn" data-t="poem" onclick="showTab('poem')">📜 القصيدة</button>
             <button class="tab-btn" data-t="inter" onclick="showTab('inter')">✨ التفاعلات</button>
+            <button class="tab-btn" data-t="gallery" onclick="showTab('gallery')">🖼️ المعرض</button>
             <button class="tab-btn" data-t="stats" onclick="showTab('stats')">📊 الإحصائيات</button>
             <button class="tab-btn" data-t="voices" onclick="showTab('voices')">🎙️ رسائلها</button>
         </div>
@@ -186,6 +187,7 @@
                 <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="ck-memory"> 🧩 الذاكرة</label>
                 <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="ck-stars"> 🌌 النجوم</label>
                 <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="ck-candles"> 🎂 الشموع</label>
+                <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="ck-gallery"> 🖼️ المعرض</label>
             </div>
 
             <div class="toolbar" style="margin-top:16px">
@@ -193,6 +195,17 @@
                 <button class="tbtn" onclick="loadAll()">↺ استعادة المحفوظ</button>
             </div>
             <p class="status" id="inter-status" style="text-align:center"></p>
+        </div>
+
+        <div id="tab-gallery" style="display:none">
+            <div class="toolbar">
+                <button class="save" onclick="saveGallery()">💾 حفظ المعرض</button>
+                <button class="tbtn" onclick="pickGalImage(this)">📁 إضافة لوحة</button>
+                <button class="tbtn" onclick="loadAll().then(renderGalleryAdmin)">↺ تحديث</button>
+            </div>
+            <p class="hint" style="text-align:center">الصورة الأولى = اللوحة الرئيسية الكبيرة في الموقع — رتّبي بالأسهم ↑ ↓</p>
+            <p class="status" id="gal-status" style="text-align:center"></p>
+            <div id="glist"><div class="loading">...جاري التحميل</div></div>
         </div>
 
         <div id="tab-stats" style="display:none">
@@ -262,7 +275,7 @@ async function enter() {
 if (sessionStorage.getItem('ok')==='1') enter();
 
 function showTab(t) {
-    ['puzzles','texts','poem','inter','stats','voices'].forEach(x =>
+    ['puzzles','texts','poem','inter','gallery','stats','voices'].forEach(x =>
         document.getElementById('tab-'+x).style.display = x===t ? '' : 'none');
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.t===t));
     if (t==='voices') loadVoices();
@@ -336,6 +349,7 @@ async function loadAll() {
         $id('ck-memory').checked = vis.memory !== false;
         $id('ck-stars').checked = vis.stars !== false;
         $id('ck-candles').checked = vis.candles === true;
+        $id('ck-gallery').checked = vis.gallery !== false;
         $id('ta-memory-letter').value = INT_RAW.memoryLetter || '';
         $id('ta-stars').value = INT_RAW.starsMessage || '';
         $id('ta-candles-title').value = INT_RAW.candlesTitle || '';
@@ -343,6 +357,15 @@ async function loadAll() {
         renderSlidePreview();
         renderMemoryPreview();
         renderSongPreview();
+        GAL = Array.isArray(map.gallery)
+            ? map.gallery.filter(g => g && g.url).map((g, i) => ({
+                id: g.id || crypto.randomUUID(),
+                url: String(g.url),
+                title: g.title || '',
+                caption: g.caption || ''
+            }))
+            : [];
+        renderGalleryAdmin();
     } catch (e) {
         document.getElementById('plist').innerHTML =
             `<div class="empty">⚠️ خطأ اتصال: ${esc(e.message)}</div>`;
@@ -682,7 +705,8 @@ async function saveInteractions() {
                 slide: $id('ck-slide').checked,
                 memory: $id('ck-memory').checked,
                 stars: $id('ck-stars').checked,
-                candles: $id('ck-candles').checked
+                candles: $id('ck-candles').checked,
+                gallery: $id('ck-gallery').checked
             }
         });
         st.textContent = '✔ حُفظ — الموقع تحدث تلقائياً!';
@@ -703,6 +727,124 @@ async function savePoem() {
         st.textContent = '✔ حُفظت القصيدة!';
     } catch (e) {
         st.textContent = '✕ خطأ: ' + e.message; st.className = 'status err';
+    }
+}
+
+// ================= GALLERY =================
+let GAL = [];
+
+function renderGalleryAdmin() {
+    const el = $id('glist');
+    if (!GAL.length) {
+        el.innerHTML = '<div class="empty">لا لوحات بعد — اضغطي «📁 إضافة لوحة».<br>الأولى تظهر كبيرة في الموقع.</div>';
+        return;
+    }
+    el.innerHTML = GAL.map((g, i) => `
+        <div class="card" data-i="${i}">
+            <div class="num-row">
+                <div class="num-badge">${i+1}${i===0?' ★':''}</div>
+                <img src="${esc(g.url)}" style="width:90px;height:70px;object-fit:cover;border-radius:8px;border:1px solid #e2d7c4">
+                <div class="actions" style="margin-top:0;margin-inline-start:auto">
+                    <button class="tbtn" onclick="galMove(${i},-1)" ${i===0?'disabled style="opacity:.4"':''}>↑</button>
+                    <button class="tbtn" onclick="galMove(${i},1)" ${i===GAL.length-1?'disabled style="opacity:.4"':''}>↓</button>
+                    <button class="del" onclick="galDel(${i})">🗑️</button>
+                </div>
+            </div>
+            <label>🖼️ العنوان</label>
+            <input type="text" class="f-gt" value="${esc(g.title||'')}" placeholder="مثال: وردة الصباح">
+            <label>✍️ الوصف (يظهر تحت اللوحة)</label>
+            <textarea class="f-gc" placeholder="كلمة صغيرة عن هذه اللوحة...">${esc(g.caption||'')}</textarea>
+        </div>`).join('');
+}
+
+document.getElementById('glist').addEventListener('input', e => {
+    const card = e.target.closest('.card');
+    if (!card || card.dataset.i === undefined) return;
+    const i = +card.dataset.i;
+    if (!GAL[i]) return;
+    if (e.target.classList.contains('f-gt')) GAL[i].title = e.target.value;
+    if (e.target.classList.contains('f-gc')) GAL[i].caption = e.target.value;
+});
+
+function galMove(i, d) {
+    const j = i + d;
+    if (j < 0 || j >= GAL.length) return;
+    [GAL[i], GAL[j]] = [GAL[j], GAL[i]];
+    renderGalleryAdmin();
+}
+
+function galDel(i) {
+    if (!confirm(`حذف اللوحة رقم ${i+1} نهائياً؟`)) return;
+    GAL.splice(i, 1);
+    renderGalleryAdmin();
+}
+
+async function saveGallery() {
+    const st = document.getElementById('gal-status');
+    st.textContent = '...جاري الحفظ'; st.className = 'status ok';
+    try {
+        await saveKey('gallery', GAL.filter(g => g.url && String(g.url).trim()));
+        st.textContent = '✔ حُفظ — المعرض تحدث تلقائياً!';
+    } catch (e) {
+        st.textContent = '✕ خطأ: ' + e.message; st.className = 'status err';
+    }
+}
+
+function pickGalImage(btn) {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*';
+    inp.onchange = () => inp.files[0] && uploadGalImage(inp.files[0], btn);
+    inp.click();
+}
+
+async function uploadGalImage(file, btn) {
+    const st = document.getElementById('gal-status');
+    if (!file.type.startsWith('image/')) { st.textContent = '✕ اختر ملف صورة فقط'; st.className = 'status err'; return; }
+    if (file.size > 8 * 1024 * 1024) { st.textContent = '✕ الصورة كبيرة جداً — الحد ٨ ميغا'; st.className = 'status err'; return; }
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const fname = `gallery-${crypto.randomUUID()}.${ext}`;
+    const url = `${SB_URL}/storage/v1/object/rewards/${fname}`;
+    btn.disabled = true;
+    st.textContent = '...جاري الرفع 0%'; st.className = 'status ok';
+    let done = false;
+    const finish = () => { if (!done) { done = true; clearTimeout(failTimer); btn.disabled = false; } };
+    const failTimer = setTimeout(() => {
+        if (done) return;
+        try { xhr.abort(); } catch (_) {}
+        finish();
+        st.textContent = '✕ انتهت مهلة الرفع — تحققي من الاتصال وحاولي مجدداً'; st.className = 'status err';
+    }, 60000);
+    const xhr = new XMLHttpRequest();
+    try {
+        const h = await authHeaders(false);
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader('Authorization', h.Authorization);
+        xhr.setRequestHeader('apikey', h.apikey);
+        xhr.setRequestHeader('Content-Type', file.type);
+        xhr.upload.onprogress = e => {
+            if (e.lengthComputable) st.textContent = `...جاري الرفع ${Math.round(e.loaded / e.total * 100)}%`;
+        };
+        xhr.onload = () => {
+            finish();
+            if (xhr.status >= 200 && xhr.status < 300) {
+                GAL.push({ id: crypto.randomUUID(), url: `${SB_URL}/storage/v1/object/public/rewards/${fname}`, title: '', caption: '' });
+                renderGalleryAdmin();
+                st.textContent = '✔ رُفعت — أضيفي عنواناً ثم اضغطي 💾 حفظ المعرض';
+            } else {
+                let msg = 'HTTP ' + xhr.status;
+                try { msg = JSON.parse(xhr.responseText).message || msg; } catch (_) {}
+                st.textContent = '✕ فشل الرفع: ' + msg; st.className = 'status err';
+            }
+        };
+        xhr.onerror = () => {
+            finish();
+            st.textContent = '✕ خطأ شبكة — تعطّل الإرسال'; st.className = 'status err';
+        };
+        xhr.onabort = () => { finish(); st.className = 'status err'; };
+        xhr.send(file);
+    } catch (e) {
+        finish();
+        st.textContent = '✕ فشل بدء الرفع: ' + e.message; st.className = 'status err';
     }
 }
 
@@ -791,7 +933,7 @@ async function uploadImg(file, btn) {
 const SEC_NAMES = { hero:'🖼️ الواجهة (القصيدة)', daily:'💬 رسالة اليوم', reason:'💗 أسباب الحب', balloons:'🎈 البالونات',
     wheel:'🎡 العجلة', breath:'🌬️ التنفّس',
     heart:'❤️ القلب', gift:'🎁 الهدية', slide:'🖼️ البازل', memory:'🧩 الذاكرة', stars:'🌌 النجوم',
-    candles:'🎂 الشموع', boxes:'🧩 صناديق الألغاز', other:'أخرى' };
+    candles:'🎂 الشموع', boxes:'🧩 صناديق الألغاز', gallery:'🖼️ المعرض', other:'أخرى' };
 
 let _allStatsRows = [];
 let _statsOffset = 0;
