@@ -163,6 +163,9 @@
             <label class="lbl">🌌 رسالة رسم النجوم (بعد إكمال القلب)</label>
             <textarea class="big-ta" id="ta-stars"></textarea>
 
+            <label class="lbl">🔤 كلمات لعبة «أكملي الكلمة» (كلمة حب واحدة في كل سطر)</label>
+            <textarea class="big-ta" id="ta-words"></textarea>
+
             <label class="lbl">🎂 عنوان الشموع</label>
             <input type="text" id="ta-candles-title" style="width:100%;border:1px solid #e2d7c4;border-radius:9px;padding:10px;font-family:inherit;font-size:0.95rem;outline:none;color:#2f2a24;background:#fbf9f2">
 
@@ -187,6 +190,7 @@
                 <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="ck-memory"> 🧩 الذاكرة</label>
                 <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="ck-stars"> 🌌 النجوم</label>
                 <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="ck-candles"> 🎂 الشموع</label>
+                <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="ck-words"> 🔤 الكلمة</label>
                 <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="ck-gallery"> 🖼️ المعرض</label>
             </div>
 
@@ -348,10 +352,12 @@ async function loadAll() {
         $id('ck-slide').checked = vis.slide !== false;
         $id('ck-memory').checked = vis.memory !== false;
         $id('ck-stars').checked = vis.stars !== false;
+        $id('ck-words').checked = vis.words !== false;
         $id('ck-candles').checked = vis.candles === true;
         $id('ck-gallery').checked = vis.gallery !== false;
         $id('ta-memory-letter').value = INT_RAW.memoryLetter || '';
         $id('ta-stars').value = INT_RAW.starsMessage || '';
+        $id('ta-words').value = (INT_RAW.wordList || []).join('\n');
         $id('ta-candles-title').value = INT_RAW.candlesTitle || '';
         $id('ta-candles').value = INT_RAW.candlesMessage || '';
         renderSlidePreview();
@@ -694,6 +700,7 @@ async function saveInteractions() {
             giftMessage: $id('ta-gift').value.trim(),
             memoryLetter: $id('ta-memory-letter').value.trim(),
             starsMessage: $id('ta-stars').value.trim(),
+            wordList: $id('ta-words').value.split('\n').map(s => s.trim()).filter(Boolean),
             candlesTitle: $id('ta-candles-title').value.trim(),
             candlesMessage: $id('ta-candles').value.trim(),
             visibility: {
@@ -705,6 +712,7 @@ async function saveInteractions() {
                 slide: $id('ck-slide').checked,
                 memory: $id('ck-memory').checked,
                 stars: $id('ck-stars').checked,
+                words: $id('ck-words').checked,
                 candles: $id('ck-candles').checked,
                 gallery: $id('ck-gallery').checked
             }
@@ -933,7 +941,7 @@ async function uploadImg(file, btn) {
 const SEC_NAMES = { hero:'🖼️ الواجهة (القصيدة)', daily:'💬 رسالة اليوم', reason:'💗 أسباب الحب', balloons:'🎈 البالونات',
     wheel:'🎡 العجلة', breath:'🌬️ التنفّس',
     heart:'❤️ القلب', gift:'🎁 الهدية', slide:'🖼️ البازل', memory:'🧩 الذاكرة', stars:'🌌 النجوم',
-    candles:'🎂 الشموع', boxes:'🧩 صناديق الألغاز', gallery:'🖼️ المعرض', other:'أخرى' };
+    candles:'🎂 الشموع', boxes:'🧩 صناديق الألغاز', gallery:'🖼️ المعرض', words:'🔤 الكلمة', other:'أخرى' };
 
 let _allStatsRows = [];
 let _statsOffset = 0;

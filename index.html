@@ -18,7 +18,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="styles.css?v=31">
+    <link rel="stylesheet" href="styles.css?v=32">
 </head>
 <body>
 
@@ -187,6 +187,15 @@
                     <p id="draw-guess-text" style="margin-top:12px;min-height:1.4em;color:var(--accent);font-size:1rem;line-height:1.9"></p>
                     <p class="rec-status" id="draw-status"></p>
                 </div>
+
+                <div class="card" id="words-card" style="text-align:center" data-sec="words">
+                    <span class="label">✦ أكملي الكلمة ✦</span>
+                    <p class="hint-line" id="words-hint">المسي حرفًا ليملأ أول فراغ — والمسِ الحرف المملوء لمسحه</p>
+                    <div class="word-slots" id="word-slots"></div>
+                    <div class="word-opts" id="word-opts"></div>
+                    <p id="words-msg" style="margin-top:12px;min-height:1.4em;color:var(--accent);font-size:1rem;line-height:1.9"></p>
+                    <button class="btn btn-ghost" id="words-next">✦ كلمة جديدة ✦</button>
+                </div>
             </section>
 
             <!-- TAB: JOURNEY -->
@@ -324,6 +333,6 @@
     <button id="install-btn">✦ Install App</button>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=31" defer></script>
+    <script src="app.js?v=32" defer></script>
 </body>
 </html>

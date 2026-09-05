@@ -448,6 +448,22 @@
 
         #stars-canvas { height: 300px; display: block; margin: 0 auto; touch-action: none; }
 
+        .word-slots { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 6px 0 14px; }
+        .word-slot { width: 46px; height: 56px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem; font-family: 'Amiri', serif; border: 1px solid var(--border); background: #fbf9f2;
+            color: var(--text-main); cursor: default; user-select: none; }
+        .word-slot.given { background: #fff; color: var(--accent); font-weight: 700; }
+        .word-slot.filled { background: #fff; border-color: var(--primary); cursor: pointer; }
+        .word-slot.wrong { border-color: #b6493e; color: #b6493e; animation: wordshake 0.3s ease; }
+        .word-slot.right { border-color: #7a9e8a; }
+        @keyframes wordshake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+        .word-opts { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+        .word-opt { min-width: 46px; height: 46px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--border);
+            background: linear-gradient(160deg, #e4d6bd, #b08a5c); color: #fff; font-size: 1.4rem;
+            font-family: 'Amiri', serif; cursor: pointer; transition: transform 0.15s ease, opacity 0.2s ease; }
+        .word-opt:hover { transform: scale(1.06); }
+        .word-opt.used { opacity: 0.25; pointer-events: none; }
+
         #draw-canvas { background: #fbf9f2; border: 1px solid var(--border); border-radius: 12px; }
         .draw-color { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--border); cursor: pointer; padding: 0; }
         .draw-color.active { box-shadow: 0 0 0 2px var(--primary); transform: scale(1.12); }

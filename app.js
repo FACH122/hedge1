@@ -455,6 +455,7 @@
         initStars();
         initCandles();
         renderGallery();
+        initWords();
     }
 
     // ================= ART GALLERY =================
@@ -918,6 +919,122 @@
         const cardObs = new MutationObserver(()=>{ if($id('draw-card').classList.contains('draw-fullscreen')) resizeDraw(); });
         cardObs.observe($id('draw-card'), {attributes:true, attributeFilter:['class']});
     })();
+
+    // WORD COMPLETION — complete the word
+    const FALLBACK_WORDS = ['حبيبتي','قمر','ورده','عشق','قلب','غرام','حنان','اشتياق','هيام','عيونك','ضحكتك','دنيتي'];
+    const AR_LETTERS = 'ابتثجحخدرزسشصضطظعغفقكلمنهويء'.split('');
+    const WORD_WIN_MSGS = ['أحسنتِ يا ذكية ✦','عقلكِ حلو مثل قلبكِ ✦','كلمةٌ تُشبهكِ تمامًا ✦','برافو… كنتُ أعرف أنكِ ستعرفين ✦'];
+    let wordCur = '', wordBlankIdx = [], wordFill = [], wordOpts = [], wordDone = false, wordLock = false;
+    function normWord(s) {
+        return String(s || '').replace(/[أإآٱ]/g, 'ا').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي')
+            .replace(/ة/g, 'ه').replace(/[ً-ٰٟ]/g, '').replace(/\s+/g, '').trim();
+    }
+    function intWordList() {
+        const raw = Array.isArray(interactions.wordList) ? interactions.wordList : [];
+        const clean = [...new Set(raw.map(normWord).filter(w => w.length >= 3 && w.length <= 9))];
+        return clean.length ? clean : FALLBACK_WORDS;
+    }
+    function shuffled(a) {
+        const x = a.slice();
+        for (let i = x.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [x[i], x[j]] = [x[j], x[i]];
+        }
+        return x;
+    }
+    function pickWord() {
+        const list = intWordList();
+        let w = list[Math.floor(Math.random() * list.length)];
+        if (list.length > 1) { let guard = 0; while (w === wordCur && guard++ < 10) w = list[Math.floor(Math.random() * list.length)]; }
+        wordCur = w;
+        const idx = [];
+        for (let i = 1; i < [...w].length; i++) idx.push(i);
+        const k = Math.max(1, Math.min(3, Math.floor([...w].length * 0.45), idx.length));
+        wordBlankIdx = shuffled(idx).slice(0, k).sort((a, b) => a - b);
+        wordFill = wordBlankIdx.map(() => '');
+        const letters = [...w];
+        const missing = wordBlankIdx.map(i => letters[i]);
+        const pool = AR_LETTERS.filter(ch => !w.includes(ch));
+        const distract = shuffled(pool).slice(0, missing.length);
+        wordOpts = shuffled([...missing, ...distract]).map(ch => ({ ch, used: false }));
+        wordDone = false; wordLock = false;
+    }
+    function renderWord() {
+        const slots = $id('word-slots'), opts = $id('word-opts'), msg = $id('words-msg');
+        if (!slots || !wordCur) return;
+        msg.textContent = '';
+        const letters = [...wordCur];
+        slots.innerHTML = letters.map((ch, i) => {
+            const b = wordBlankIdx.indexOf(i);
+            if (b < 0) return `<div class="word-slot given">${esc(ch)}</div>`;
+            const f = wordFill[b];
+            return `<div class="word-slot ${f ? 'filled' : ''}" data-b="${b}">${f ? esc(f) : '·'}</div>`;
+        }).join('');
+        opts.innerHTML = wordOpts.map((o, i) =>
+            `<button class="word-opt ${o.used ? 'used' : ''}" data-o="${i}">${esc(o.ch)}</button>`).join('');
+        $id('words-hint').textContent = `كلمة من ${letters.length} حروف · تبدأ بـ «${esc(letters[0])}»`;
+        slots.querySelectorAll('.word-slot.filled').forEach(s =>
+            s.addEventListener('click', () => clearSlot(+s.dataset.b)));
+        opts.querySelectorAll('.word-opt').forEach(b =>
+            b.addEventListener('click', () => fillSlot(+b.dataset.o)));
+    }
+    function fillSlot(oi) {
+        if (wordDone || wordLock || !wordOpts[oi] || wordOpts[oi].used) return;
+        const b = wordFill.indexOf('');
+        if (b < 0) return;
+        wordFill[b] = wordOpts[oi].ch;
+        wordOpts[oi].used = true;
+        renderWord();
+        if (!wordFill.includes('')) checkWord();
+    }
+    function clearSlot(b) {
+        if (wordDone || wordLock || !wordFill[b]) return;
+        const oi = wordOpts.findIndex(o => o.used && o.ch === wordFill[b]);
+        if (oi >= 0) wordOpts[oi].used = false;
+        wordFill[b] = '';
+        renderWord();
+    }
+    function checkWord() {
+        const letters = [...wordCur];
+        const ok = wordBlankIdx.every((pos, b) => wordFill[b] === letters[pos]);
+        if (ok) {
+            wordDone = true;
+            document.querySelectorAll('#word-slots .word-slot').forEach(s => s.classList.add('right'));
+            $id('words-msg').textContent = WORD_WIN_MSGS[Math.floor(Math.random() * WORD_WIN_MSGS.length)];
+            playChime();
+            burst(innerWidth / 2, innerHeight / 2, 60);
+            if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
+            try { trackEvent('word_win', 'words', { len: letters.length }); } catch (_) {}
+            setTimeout(() => { if (wordDone) { pickWord(); renderWord(); } }, 2000);
+        } else {
+            wordLock = true;
+            const slots = document.querySelectorAll('#word-slots .word-slot');
+            wordBlankIdx.forEach((pos, b) => {
+                if (wordFill[b] !== letters[pos]) slots[pos].classList.add('wrong');
+            });
+            showToast('ليس بعد… حاولي مجددًا ✦');
+            setTimeout(() => {
+                wordBlankIdx.forEach((pos, b) => {
+                    if (wordFill[b] !== letters[pos]) {
+                        const oi = wordOpts.findIndex(o => o.used && o.ch === wordFill[b]);
+                        if (oi >= 0) wordOpts[oi].used = false;
+                        wordFill[b] = '';
+                    }
+                });
+                wordLock = false;
+                renderWord();
+            }, 900);
+        }
+    }
+    function initWords() {
+        const vis = (interactions.visibility || {}).words !== false;
+        const card = $id('words-card');
+        if (card) card.style.display = vis ? '' : 'none';
+        if (!vis) return;
+        pickWord();
+        renderWord();
+    }
+    $id('words-next').addEventListener('click', () => { pickWord(); renderWord(); });
 
     // BLOW THE CANDLES
     let candleOut = 0, candleTotal = 3, candleDone = false, micStream = null;
